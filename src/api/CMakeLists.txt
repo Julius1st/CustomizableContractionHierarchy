@@ -9,4 +9,4 @@ target_link_libraries(cch_api
         cch_query
 )
 
-target_include_directories(cch_api PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(cch_api PUBLIC .)
