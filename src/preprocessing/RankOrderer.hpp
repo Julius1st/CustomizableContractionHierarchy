@@ -2,7 +2,16 @@
 // Created by Julius on 26.09.2025.
 //
 
-#ifndef CUSTOMIZABLECONTRACTIONHIERARCHY_RANKORDERER_HPP
-#define CUSTOMIZABLECONTRACTIONHIERARCHY_RANKORDERER_HPP
+#pragma once
+#include "core/Graph.hpp"
+#include <vector>
 
-#endif //CUSTOMIZABLECONTRACTIONHIERARCHY_RANKORDERER_HPP
+class RankOrderer {
+public:
+    RankOrderer(const Graph& g);
+
+    std::vector<int> computeOrder();
+
+private:
+    const Graph& G;
+};

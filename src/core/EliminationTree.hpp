@@ -2,7 +2,16 @@
 // Created by Julius on 26.09.2025.
 //
 
-#ifndef CUSTOMIZABLECONTRACTIONHIERARCHY_ELIMINATIONTREE_HPP
-#define CUSTOMIZABLECONTRACTIONHIERARCHY_ELIMINATIONTREE_HPP
+#pragma once
+#include <vector>
 
-#endif //CUSTOMIZABLECONTRACTIONHIERARCHY_ELIMINATIONTREE_HPP
+class EliminationTree {
+public:
+    EliminationTree(int n = 0);
+
+    void setParent(int v, int parent);
+    int parentOf(int v) const;
+
+private:
+    std::vector<int> parent;
+};

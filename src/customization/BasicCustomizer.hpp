@@ -2,7 +2,19 @@
 // Created by Julius on 26.09.2025.
 //
 
-#ifndef CUSTOMIZABLECONTRACTIONHIERARCHY_BASICCUSTOMIZER_HPP
-#define CUSTOMIZABLECONTRACTIONHIERARCHY_BASICCUSTOMIZER_HPP
+#pragma once
+#include "core/Graph.hpp"
+#include <vector>
 
-#endif //CUSTOMIZABLECONTRACTIONHIERARCHY_BASICCUSTOMIZER_HPP
+// Enforces lower triangle inequalities (bottom-up)
+class BasicCustomizer {
+public:
+    BasicCustomizer(AugmentedGraph& g);
+
+    void run();
+
+private:
+    AugmentedGraph& Gplus;
+    std::vector<double> w_up; //forward weights
+    std::vector<double> w_down; //backward weights
+};

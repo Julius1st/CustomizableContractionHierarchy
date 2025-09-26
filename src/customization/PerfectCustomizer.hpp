@@ -2,7 +2,16 @@
 // Created by Julius on 26.09.2025.
 //
 
-#ifndef CUSTOMIZABLECONTRACTIONHIERARCHY_PERFECTCUSTOMIZER_HPP
-#define CUSTOMIZABLECONTRACTIONHIERARCHY_PERFECTCUSTOMIZER_HPP
+#pragma once
+#include "core/Graph.hpp"
 
-#endif //CUSTOMIZABLECONTRACTIONHIERARCHY_PERFECTCUSTOMIZER_HPP
+// Refines weights using upper/intermediate triangle (top-down)
+class PerfectCustomizer {
+public:
+    PerfectCustomizer(AugmentedGraph& g);
+
+    void run();
+
+private:
+    AugmentedGraph& Gplus;
+};
