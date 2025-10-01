@@ -1,5 +1,6 @@
 add_library(cch_api
         CCH.cpp
+        DecodeVector.cpp
 )
 
 target_link_libraries(cch_api
