@@ -28,6 +28,14 @@ void Graph::removeEdge(int u, int v) {
     if (it != nu.end()) nu.erase(it);
 }
 
+void Graph::setWeight(int u, int v, uint32_t weight) {
+    if (u == v) throw std::invalid_argument("Tried to set weight for Edge from node " + std::to_string(u) + " to " + std::to_string(v) + " but no self loops exist.");
+    if (u < 0 || u >= n) throw std::out_of_range("Tried to set weight for Edge from node " + std::to_string(u) + " to " + std::to_string(v) + " but but the first ID is out of bounds.");
+    if (v < 0 || v >= n) throw std::out_of_range("Tried to set weight for Edge from node " + std::to_string(u) + " to " + std::to_string(v) + " but but the second ID is out of bounds.");
+
+    weights[u][v] = weight;
+}
+
 const std::vector<int>& Graph::neighbors(int u) const {
     return adj[u];
 }

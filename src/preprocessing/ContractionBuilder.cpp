@@ -19,6 +19,8 @@ void ContractionBuilder::permuteNodeIDs() {
             int newU = rank[u];
             int newV = rank[v];
             Gplus.addEdge(newU, newV);
+            Gplus.setWeight(newU, newV, G.getWeight(u, v));
+            Gplus.setWeight(newV, newU, G.getWeight(v, u));
         }
     }
 }
