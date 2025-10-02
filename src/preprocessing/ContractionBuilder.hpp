@@ -10,11 +10,16 @@
 // Builds the Augmented Graph G+ and the elimination tree
 class ContractionBuilder {
 public:
-    ContractionBuilder(const Graph& g, const std::vector<int>& rankOrder);
+    ContractionBuilder(const Graph& g, Graph& Gplus, const std::vector<int>& rankOrder) : G(g), rank(rankOrder) {Gplus = Gplus;}
 
-    AugmentedGraph build(AugmentedGraph& Gplus, EliminationTree& ET);
+    // Expects that numVertices(Gplus) == numVertices(G)
+    void buildGplus();
 
 private:
     const Graph& G;
-    std::vector<int> rank;
+    Graph Gplus;
+    const std::vector<int> rank;
+
+    void permuteNodeIDs();
+    void contractGraph();
 };
