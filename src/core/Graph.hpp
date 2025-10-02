@@ -3,44 +3,27 @@
 //
 #pragma once
 #include <vector>
-
-// A directed edge
-struct Edge {
-    int tail;
-    int head;
-    double weight;
-    bool isShortcut;
-    int via; // used for unpacking, -1 if none
-};
+#include <stdexcept>
+#include <algorithm>
 
 class Graph {
 public:
     Graph(int n = 0);
 
-    void addEdge(int u, int v, double w);
-    const std::vector<Edge>& neighbors(int u) const;
+    int numVertices() const { return n;}
 
-    int numVertices() const;
-    int numEdges() const;
+    void addEdge(int u, int v);
+    void removeEdge(int u, int v);
 
-private:
-    int n;
-    std::vector<std::vector<Edge>> adj;
-    std::vector<Edge> edges;
-};
+    const std::vector<int>& neighbors(int u) const;
+    std::vector<int>& neighbors(int u);
 
-class AugmentedGraph {
-public:
-    AugmentedGraph(int n = 0);
-
-    void addEdge(int u, int v, int w, bool shortcut = false, int via = -1);
-    const std::vector<Edge>& upwardNeighbors(int u) const;
-
-    int numVertices() const;
-    int numEdges() const;
+    void initEliminationTree();
+    void setParent(int node, int parent);
+    int parentOf(int node) const;
 
 private:
     int n;
-    std::vector<std::vector<Edge>> upAdj;
-    std::vector<Edge> edges;
+    std::vector<std::vector<int>> adj;
+    std::vector<int> eliminationTree;
 };
