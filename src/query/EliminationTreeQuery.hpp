@@ -10,15 +10,16 @@
 // Elimination-tree-based query
 class EliminationTreeQuery {
 public:
-    EliminationTreeQuery(const AugmentedGraph& g, const EliminationTree& et);
+    EliminationTreeQuery(const Graph& g);
 
-    double query(int s, int t);
-    std::vector<int> unpackPath(int s, int t);
+    uint32_t query(int s, int t);
 
 private:
-    const AugmentedGraph& Gplus;
-    const EliminationTree& ET;
+    const Graph& Gplus;
 
-    std::vector<double> distUp;
-    std::vector<double> distDown;
+    std::vector<uint32_t> distUp;
+    std::vector<uint32_t> distDown;
+
+    void ProcessVertexUp(int u, uint32_t d);
+    void ProcessVertexDown(int u, uint32_t d);
 };
