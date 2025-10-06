@@ -33,7 +33,50 @@ void Graph::setWeight(int u, int v, uint32_t weight) {
     if (u < 0 || u >= n) throw std::out_of_range("Tried to set weight for Edge from node " + std::to_string(u) + " to " + std::to_string(v) + " but but the first ID is out of bounds.");
     if (v < 0 || v >= n) throw std::out_of_range("Tried to set weight for Edge from node " + std::to_string(u) + " to " + std::to_string(v) + " but but the second ID is out of bounds.");
 
-    weights[u][v] = weight;
+    if (u < v) {
+        auto it = std::find(adj[u].begin(), adj[u].end(), v);
+
+        if (it == adj[u].end()) throw std::invalid_argument("Tried to set weight for Edge from node " + std::to_string(u) + " to " + std::to_string(v) + " but they are not adjacent.");
+
+        int index = std::distance(adj[u].begin(), it);
+        upwardWeights[u][index] = weight;
+    } else {
+        std::swap(u, v);
+        auto it = std::find(adj[u].begin(), adj[u].end(), v);
+
+        if (it == adj[u].end()) throw std::invalid_argument("Tried to set weight for Edge from node " + std::to_string(u) + " to " + std::to_string(v) + " but they are not adjacent.");
+
+        int index = std::distance(adj[u].begin(), it);
+        downwardWeights[u][index] = weight;
+    }
+}
+
+uint32_t Graph::getWeight(int u, int v) const {
+    if (u == v) throw std::invalid_argument("Tried to get weight for Edge from node " + std::to_string(u) + " to " + std::to_string(v) + " but no self loops exist.");
+    if (u < 0 || u >= n) throw std::out_of_range("Tried to get weight for Edge from node " + std::to_string(u) + " to " + std::to_string(v) + " but but the first ID is out of bounds.");
+    if (v < 0 || v >= n) throw std::out_of_range("Tried to get weight for Edge from node " + std::to_string(u) + " to " + std::to_string(v) + " but but the second ID is out of bounds.");
+
+    if (u < v) {
+        auto it = std::find(adj[u].begin(), adj[u].end(), v);
+
+        if (it == adj[u].end()) throw std::invalid_argument("Tried to get weight for Edge from node " + std::to_string(u) + " to " + std::to_string(v) + " but they are not adjacent.");
+
+        int index = std::distance(adj[u].begin(), it);
+        return upwardWeights[u][index];
+    } else {
+        std::swap(u, v);
+        auto it = std::find(adj[u].begin(), adj[u].end(), v);
+
+        if (it == adj[u].end()) throw std::invalid_argument("Tried to get weight for Edge from node " + std::to_string(u) + " to " + std::to_string(v) + " but they are not adjacent.");
+
+        int index = std::distance(adj[u].begin(), it);
+        return downwardWeights[u][index];
+    }
+}
+
+bool Graph::isEdge(int u, int v) const {
+    if (std::find(neighbors(u).begin(), neighbors(u).end(), v) == neighbors(u).end()) return false;
+    else return true;
 }
 
 const std::vector<int>& Graph::neighbors(int u) const {
@@ -45,7 +88,7 @@ const std::vector<int>& Graph::neighbors(int u) const {
 }
 
 void Graph::initEliminationTree() {
-    eliminationTree.assign(n, -1);
+    eliminationTree.assign(n, NO_ET_PARENT);
 }
 
 void Graph::setParent(int node, int parent) {
