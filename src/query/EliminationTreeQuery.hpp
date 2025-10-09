@@ -11,7 +11,7 @@ class EliminationTreeQuery {
 public:
     EliminationTreeQuery(const Graph& g);
 
-    uint32_t query(int s, int t);
+    uint32_t query(uint32_t s, uint32_t t);
 
 private:
     const Graph& Gplus;
@@ -19,6 +19,6 @@ private:
     std::vector<uint32_t> distUp;
     std::vector<uint32_t> distDown;
 
-    void ProcessVertexUp(int u, uint32_t d);
-    void ProcessVertexDown(int u, uint32_t d);
+    void ProcessVertexUp(uint32_t u, uint32_t d);
+    void ProcessVertexDown(uint32_t u, uint32_t d);
 };

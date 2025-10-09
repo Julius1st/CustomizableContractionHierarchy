@@ -9,9 +9,8 @@ EliminationTreeQuery::EliminationTreeQuery(const Graph &g) : Gplus(g){
     distDown = std::vector<uint32_t> (Gplus.numVertices(), Graph::MAX_UINT32);
 }
 
-uint32_t EliminationTreeQuery::query(int s, int t) {
+uint32_t EliminationTreeQuery::query(uint32_t s, uint32_t t) {
     while (s != t) {
-        // TODO: set s or to to infinity if out of bounds? (See Algo 3.5)
         if (s < t) {
             ProcessVertexUp(s, Graph::MAX_UINT32);
             s = Gplus.parentOf(s);
@@ -22,9 +21,9 @@ uint32_t EliminationTreeQuery::query(int s, int t) {
     }
 
     uint32_t d = Graph::MAX_UINT32;
-    int u = s;
+    uint32_t u = s;
 
-    while (u != Graph::NO_ET_PARENT) {
+    while (u != Graph::MAX_UINT32) {
         d = std::min(d, distUp[u] + distDown[u]);
         ProcessVertexUp(u, d);
         ProcessVertexDown(u, d);
@@ -34,18 +33,20 @@ uint32_t EliminationTreeQuery::query(int s, int t) {
     return d;
 }
 
-void EliminationTreeQuery::ProcessVertexUp(int u, uint32_t d) {
+void EliminationTreeQuery::ProcessVertexUp(uint32_t u, uint32_t d) {
     if (distUp[u] < d) {
-        for (int v : Gplus.neighbors(u)) {
+        for (auto it = Gplus.beginNeighborhood(u); it != Gplus.endNeighborhood(u); it++) {
+            uint32_t v = *it;
             distUp[v] = std::min(distUp[v], distUp[u] + Gplus.getWeight(u, v));
         }
     }
     distUp[u] = Graph::MAX_UINT32;
 }
 
-void EliminationTreeQuery::ProcessVertexDown(int u, uint32_t d) {
+void EliminationTreeQuery::ProcessVertexDown(uint32_t u, uint32_t d) {
     if (distDown[u] < d) {
-        for (int v : Gplus.neighbors(u)) {
+        for (auto it = Gplus.beginNeighborhood(u); it != Gplus.endNeighborhood(u); it++) {
+            uint32_t v = *it;
             distDown[v] = std::min(distDown[v], distDown[u] + Gplus.getWeight(v, u));
         }
     }
