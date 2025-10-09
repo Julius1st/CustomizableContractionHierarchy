@@ -4,7 +4,6 @@
 
 #pragma once
 #include "core/Graph.hpp"
-#include "core/EliminationTree.hpp"
 #include "preprocessing/RankOrderer.hpp"
 #include "preprocessing/ContractionBuilder.hpp"
 #include "customization/BasicCustomizer.hpp"

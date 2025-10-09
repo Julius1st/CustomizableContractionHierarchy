@@ -4,7 +4,6 @@
 
 #pragma once
 #include "core/Graph.hpp"
-#include "core/EliminationTree.hpp"
 #include <vector>
 
 // Elimination-tree-based query

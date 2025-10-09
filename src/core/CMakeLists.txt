@@ -1,6 +1,5 @@
 add_library(cch_core
         Graph.cpp
-        EliminationTree.cpp
 )
 
 # Expose the project src/ folder so "core/Graph.hpp" resolves
