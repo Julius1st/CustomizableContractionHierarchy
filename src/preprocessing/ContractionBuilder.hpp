@@ -4,7 +4,6 @@
 
 #pragma once
 #include "core/Graph.hpp"
-#include "core/EliminationTree.hpp"
 #include <vector>
 
 // Builds the Augmented Graph G+ and the elimination tree
