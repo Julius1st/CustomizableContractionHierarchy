@@ -6,8 +6,6 @@
 
 Graph* ContractionBuilder::buildGplus() {
     permuteNodeIDs();
-
-    // Do contraction of Graph
     contractGraph();
 
     return Gplus;
@@ -24,7 +22,7 @@ void ContractionBuilder::permuteNodeIDs() {
 
     // Build a reverse mapping of rank
     for (uint32_t u = 0; u < rank.size(); u++) {
-        reverseRank[rank[0]] = 0;
+        reverseRank[rank[u]] = u;
     }
 
     uint32_t currentIndex = 0;
@@ -35,24 +33,11 @@ void ContractionBuilder::permuteNodeIDs() {
             currentIndex++;
         }
     }
-}
 
-std::vector<uint32_t> ContractionBuilder::permuteWeights(std::vector<uint32_t> weights) {
-    uint32_t n = G.numVertices();
-    uint32_t m = G.numEdges();
-    if(m != weights.size()) throw std::invalid_argument("When permuting the weights in the ContractionBuilder, the number of weights did not match the number of edges in the original Graph.");
-    std::vector<uint32_t> permutedWeights(m);
-
-    uint32_t currentIndex = 0;
+    // sort neighborhoods in Head
     for (uint32_t u = 0; u < n; u++) {
-        for (auto it = G.beginNeighborhood(reverseRank[u]); it != G.endNeighborhood(reverseRank[u]); it++) {
-            uint32_t index = std::distance(G.beginNeighborhood(0), it);
-            permutedWeights[currentIndex] = weights[index];
-            currentIndex++;
-        }
+        std::sort(permutedHead.begin() + permutedFirstOut[u], permutedHead.begin() + permutedFirstOut[u+1]);
     }
-
-    return permutedWeights;
 }
 
 void ContractionBuilder::contractGraph() {
@@ -83,18 +68,57 @@ void ContractionBuilder::contractGraph() {
     }
 
     // Build Gplus
-    std::vector<uint32_t> newFirstOut(G.numVertices()+1);
-    std::vector<uint32_t> newHead;
+    GplusFirstOut.resize(G.numVertices() + 1);
     uint32_t currentIndex = 0;
 
     for (uint32_t u = 0; u < G.numVertices(); u++) {
-        newFirstOut[u] = currentIndex;
+        GplusFirstOut[u] = currentIndex;
         for (uint32_t h : adj[u]) {
-            newHead.push_back(h);
+            GplusHead.push_back(h);
             currentIndex++;
         }
     }
 
-    newFirstOut[G.numVertices()] = newHead.size();
-    Gplus = new Graph(newFirstOut, newHead, ET);
+    GplusFirstOut[G.numVertices()] = GplusHead.size();
+    Gplus = new Graph(GplusFirstOut, GplusHead, ET);
+}
+
+std::vector<uint32_t>* ContractionBuilder::permuteWeights(std::vector<uint32_t> weights) {
+    uint32_t n = G.numVertices();
+    uint32_t m = G.numEdges();
+    if(m != weights.size()) throw std::invalid_argument("When permuting the weights in the ContractionBuilder, the number of weights did not match the number of edges in the original Graph.");
+    std::vector<uint32_t> permutedWeights(m);
+
+    uint32_t currentIndex = 0;
+    for (uint32_t u = 0; u < n; u++) {
+        for (auto it = G.beginNeighborhood(reverseRank[u]); it != G.endNeighborhood(reverseRank[u]); it++) {
+            uint32_t index = std::distance(G.beginNeighborhood(0), it);
+            permutedWeights[currentIndex] = weights[index];
+            currentIndex++;
+        }
+    }
+
+    return &permutedWeights;
+}
+
+std::vector<uint32_t>* ContractionBuilder::buildNewWeightsForGplus(std::vector<uint32_t> permutedWeights) {
+    std::vector<uint32_t> newWeights(GplusHead.size(), Graph::MAX_UINT32);
+
+    for (uint32_t vertex = 0; vertex < GplusFirstOut.size()-1; vertex++) {
+        uint32_t contractedIndex = GplusFirstOut[vertex];
+        uint32_t oldIndex = permutedFirstOut[vertex];
+        while (oldIndex != permutedFirstOut[vertex+1]) {
+            if (GplusHead[contractedIndex] == permutedHead[oldIndex]) {
+                newWeights[contractedIndex] = permutedWeights[oldIndex];
+                contractedIndex++;
+                oldIndex++;
+                continue;
+            } else {
+                contractedIndex++;
+            }
+        }
+
+    }
+
+    return &newWeights;
 }

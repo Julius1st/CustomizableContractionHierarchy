@@ -12,7 +12,10 @@ public:
     ContractionBuilder(const Graph& g, const std::vector<uint32_t>& rankOrder) : G(g), rank(rankOrder) {}
 
     Graph* buildGplus();
-    std::vector<uint32_t> permuteWeights(std::vector<uint32_t> weights);
+
+    // These Methods are used to get the proper weight vectors for the customization phase
+    std::vector<uint32_t>* permuteWeights(std::vector<uint32_t> weights);
+    std::vector<uint32_t>* buildNewWeightsForGplus(std::vector<uint32_t> permutedWeights);
 
 private:
     const Graph& G;
@@ -21,6 +24,8 @@ private:
     std::vector<uint32_t> permutedFirstOut;
     std::vector<uint32_t> permutedHead;
     std::vector<uint32_t> reverseRank;
+    std::vector<uint32_t> GplusHead;
+    std::vector<uint32_t> GplusFirstOut;
 
     void permuteNodeIDs();
     void contractGraph();
