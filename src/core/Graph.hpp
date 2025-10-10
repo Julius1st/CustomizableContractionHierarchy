@@ -18,8 +18,7 @@ public:
     uint32_t numVertices() const { return n;}
     uint32_t numEdges() const {return m;}
     uint32_t getWeight(uint32_t u, uint32_t v) const; // u is considered tail and v is considered head of edge
-    std::vector<uint32_t>& getUpwardWeights() {return upwardWeights;}
-    std::vector<uint32_t>& getDownwardWeights() {return downwardWeights;}
+    void setWeight(uint32_t u, uint32_t v, uint32_t weight); // u is considered tail and v is considered head of edge
 
     void setUpwardWeights(std::vector<uint32_t>& newWeights) {upwardWeights = newWeights;}
     void setDownwardWeights(std::vector<uint32_t>& newWeights) {downwardWeights = newWeights;}
