@@ -9,10 +9,10 @@
 // Enforces lower triangle inequalities (bottom-up)
 class BasicCustomizer {
 public:
-    explicit BasicCustomizer(Graph& Gplus) {Gplus = Gplus;}
+    explicit BasicCustomizer(Graph& Graph) {G = Graph;}
 
     void run();
 
 private:
-    Graph Gplus;
+    Graph G;
 };

@@ -18,50 +18,24 @@ Graph::Graph(std::vector<uint32_t> &firstOut, std::vector<uint32_t> &head, std::
     m = head.size();
 }
 
-uint32_t Graph::getWeight(uint32_t u, uint32_t v) const {
-    if (u == v) throw std::invalid_argument("Tried to get weight for Edge from node " + std::to_string(u) + " to " + std::to_string(v) + " but no self loops exist.");
-    if (u >= n) throw std::out_of_range("Tried to get weight for Edge from node " + std::to_string(u) + " to " + std::to_string(v) + " but the first ID is out of bounds.");
-    if (v >= n) throw std::out_of_range("Tried to get weight for Edge from node " + std::to_string(u) + " to " + std::to_string(v) + " but the second ID is out of bounds.");
-
-    if (u < v) {
-        auto it = std::find(head.begin() + firstOut[u], head.begin() + firstOut[(u+1)], v);
-
-        if (it == head.begin() + firstOut[(u+1)]) throw std::invalid_argument("Tried to get weight for Edge from node " + std::to_string(u) + " to " + std::to_string(v) + " but they are not adjacent.");
-
-        uint32_t index = std::distance(head.begin(), it);
-        return upwardWeights[index];
-    } else {
-        std::swap(u, v);
-        auto it = std::find(head.begin() + firstOut[u], head.begin() + firstOut[(u+1)], v);
-
-        if (it == head.begin() + firstOut[(u+1)]) throw std::invalid_argument("Tried to get weight for Edge from node " + std::to_string(u) + " to " + std::to_string(v) + " but they are not adjacent.");
-
-        uint32_t index = std::distance(head.begin(), it);
-        return downwardWeights[index];
-    }
+uint32_t Graph::getUpwardWeight(uint32_t edgeID) const {
+    if (edgeID >= n) throw std::out_of_range("Tried to get weight for Edge with ID " + std::to_string(edgeID) + " but this ID is out of bounds.");
+    return upwardWeights[edgeID];
 }
 
-void Graph::setWeight(uint32_t u, uint32_t v, uint32_t weight) {
-    if (u == v) throw std::invalid_argument("Tried to set weight for Edge from node " + std::to_string(u) + " to " + std::to_string(v) + " but no self loops exist.");
-    if (u >= n) throw std::out_of_range("Tried to set weight for Edge from node " + std::to_string(u) + " to " + std::to_string(v) + " but the first ID is out of bounds.");
-    if (v >= n) throw std::out_of_range("Tried to set weight for Edge from node " + std::to_string(u) + " to " + std::to_string(v) + " but the second ID is out of bounds.");
+uint32_t Graph::getDownwardWeight(uint32_t edgeID) const {
+    if (edgeID >= n) throw std::out_of_range("Tried to get weight for Edge with ID " + std::to_string(edgeID) + " but this ID is out of bounds.");
+    return downwardWeights[edgeID];
+}
 
-    if (u < v) {
-        auto it = std::find(head.begin() + firstOut[u], head.begin() + firstOut[(u+1)], v);
+void Graph::setUpwardWeight(uint32_t edgeID, uint32_t weight) {
+    if (edgeID >= n) throw std::out_of_range("Tried to set weight for Edge with ID " + std::to_string(edgeID) + " but this ID is out of bounds.");
+    upwardWeights[edgeID] = weight;
+}
 
-        if (it == head.begin() + firstOut[(u+1)]) throw std::invalid_argument("Tried to set weight for Edge from node " + std::to_string(u) + " to " + std::to_string(v) + " but they are not adjacent.");
-
-        uint32_t index = std::distance(head.begin(), it);
-        upwardWeights[index]= weight;
-    } else {
-        std::swap(u, v);
-        auto it = std::find(head.begin() + firstOut[u], head.begin() + firstOut[(u+1)], v);
-
-        if (it == head.begin() + firstOut[(u+1)]) throw std::invalid_argument("Tried to set weight for Edge from node " + std::to_string(u) + " to " + std::to_string(v) + " but they are not adjacent.");
-
-        uint32_t index = std::distance(head.begin(), it);
-        downwardWeights[index] = weight;
-    }
+void Graph::setDownwardWeight(uint32_t edgeID, uint32_t weight) {
+    if (edgeID >= n) throw std::out_of_range("Tried to set weight for Edge with ID " + std::to_string(edgeID) + " but this ID is out of bounds.");
+    upwardWeights[edgeID] = weight;
 }
 
 void Graph::initEliminationTree() {

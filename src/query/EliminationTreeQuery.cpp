@@ -34,20 +34,24 @@ uint32_t EliminationTreeQuery::query(uint32_t s, uint32_t t) {
 }
 
 void EliminationTreeQuery::ProcessVertexUp(uint32_t u, uint32_t d) {
+    auto headStart = Gplus.beginNeighborhood(0);
     if (distUp[u] < d) {
         for (auto it = Gplus.beginNeighborhood(u); it != Gplus.endNeighborhood(u); it++) {
             uint32_t v = *it;
-            distUp[v] = std::min(distUp[v], distUp[u] + Gplus.getWeight(u, v));
+            uint32_t uvIndex = std::distance(headStart, it);
+            distUp[v] = std::min(distUp[v], distUp[u] + Gplus.getUpwardWeight(uvIndex));
         }
     }
     distUp[u] = Graph::MAX_UINT32;
 }
 
 void EliminationTreeQuery::ProcessVertexDown(uint32_t u, uint32_t d) {
+    auto headStart = Gplus.beginNeighborhood(0);
     if (distDown[u] < d) {
         for (auto it = Gplus.beginNeighborhood(u); it != Gplus.endNeighborhood(u); it++) {
             uint32_t v = *it;
-            distDown[v] = std::min(distDown[v], distDown[u] + Gplus.getWeight(v, u));
+            uint32_t uvIndex = std::distance(headStart, it);
+            distDown[v] = std::min(distDown[v], distDown[u] + Gplus.getDownwardWeight(uvIndex));
         }
     }
     distDown[u] = Graph::MAX_UINT32;

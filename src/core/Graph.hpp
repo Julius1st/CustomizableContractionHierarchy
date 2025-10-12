@@ -17,8 +17,11 @@ public:
 
     uint32_t numVertices() const { return n;}
     uint32_t numEdges() const {return m;}
-    uint32_t getWeight(uint32_t u, uint32_t v) const; // u is considered tail and v is considered head of edge
-    void setWeight(uint32_t u, uint32_t v, uint32_t weight); // u is considered tail and v is considered head of edge
+    uint32_t getHead(uint32_t edgeID) const {return head[edgeID];}
+    uint32_t getUpwardWeight(uint32_t edgeID) const; // the edgeID corresponds to the index the edge Head has in the head vector.
+    uint32_t getDownwardWeight(uint32_t  edgeID) const; // the edgeID corresponds to the index the edge Head has in the head vector.
+    void setUpwardWeight(uint32_t edgeID, uint32_t weight); // the edgeID corresponds to the index the edge Head has in the head vector.
+    void setDownwardWeight(uint32_t edgeID, uint32_t weight); // the edgeID corresponds to the index the edge Head has in the head vector.
 
     void setUpwardWeights(std::vector<uint32_t>& newWeights) {upwardWeights = newWeights;}
     void setDownwardWeights(std::vector<uint32_t>& newWeights) {downwardWeights = newWeights;}
