@@ -7,7 +7,6 @@
 #include "preprocessing/RankOrderer.hpp"
 #include "preprocessing/ContractionBuilder.hpp"
 #include "customization/BasicCustomizer.hpp"
-#include "customization/PerfectCustomizer.hpp"
 #include "query/EliminationTreeQuery.hpp"
 #include <vector>
 

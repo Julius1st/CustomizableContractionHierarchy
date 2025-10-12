@@ -1,6 +1,5 @@
 add_library(cch_customization
         BasicCustomizer.cpp
-        PerfectCustomizer.cpp
 )
 
 target_link_libraries(cch_customization PUBLIC cch_core)
