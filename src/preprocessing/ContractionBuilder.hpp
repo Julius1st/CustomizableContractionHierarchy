@@ -9,7 +9,7 @@
 // Builds the Augmented Graph G+ and the elimination tree
 class ContractionBuilder {
 public:
-    ContractionBuilder(const Graph& g, const std::vector<uint32_t>& rankOrder) : G(g), rank(rankOrder) {}
+    ContractionBuilder(Graph* g, std::vector<uint32_t>& rankOrder) : G(g), rank(rankOrder) {}
 
     Graph* buildGplus();
 
@@ -18,9 +18,9 @@ public:
     std::vector<uint32_t>* buildNewWeightsForGplus(std::vector<uint32_t> permutedWeights);
 
 private:
-    const Graph& G;
+    const Graph* G;
     Graph* Gplus;
-    const std::vector<uint32_t> rank;
+    std::vector<uint32_t> rank;
     std::vector<uint32_t> permutedFirstOut;
     std::vector<uint32_t> permutedHead;
     std::vector<uint32_t> reverseRank;

@@ -3,11 +3,7 @@
 //
 #include "Graph.hpp"
 
-Graph::Graph(uint32_t n, uint32_t m) : n(n), m(m){
-    initEliminationTree();
-}
-
-Graph::Graph(std::vector<uint32_t> &firstOut, std::vector<uint32_t> &head, std::vector<uint32_t> &upwardWeights, std::vector<uint32_t> &downwardWeights) : firstOut(firstOut), head(head), upwardWeights(upwardWeights), downwardWeights(downwardWeights) {
+Graph::Graph(std::vector<uint32_t> &firstOut, std::vector<uint32_t> &head) : firstOut(firstOut), head(head) {
     n = firstOut.size() -1;
     m = head.size();
     initEliminationTree();

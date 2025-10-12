@@ -9,12 +9,12 @@
 // Elimination-tree-based query
 class EliminationTreeQuery {
 public:
-    EliminationTreeQuery(const Graph& g);
+    EliminationTreeQuery(Graph* g);
 
     uint32_t query(uint32_t s, uint32_t t);
 
 private:
-    const Graph& Gplus;
+    const Graph* G;
 
     std::vector<uint32_t> distUp;
     std::vector<uint32_t> distDown;

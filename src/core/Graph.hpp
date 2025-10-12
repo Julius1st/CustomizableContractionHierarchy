@@ -11,8 +11,7 @@ class Graph {
 public:
     static const uint32_t MAX_UINT32 = 0xFFFFFFFF;
 
-    explicit Graph(uint32_t n = 0, uint32_t m = 0);
-    Graph(std::vector<uint32_t>& firstOut, std::vector<uint32_t>& head, std::vector<uint32_t>& upwardWeights, std::vector<uint32_t>& downwardWeights);
+    Graph(std::vector<uint32_t>& firstOut, std::vector<uint32_t>& head);
     Graph(std::vector<uint32_t>& firstOut, std::vector<uint32_t>& head, std::vector<uint32_t>& eliminationTree);
 
     uint32_t numVertices() const { return n;}

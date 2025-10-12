@@ -14,23 +14,19 @@
 // Facade Class
 class CCH {
 public:
-    explicit CCH(const Graph& baseGraph);
+    explicit CCH(Graph* baseGraph, std::vector<uint32_t>& rankOrder);
 
     void preprocess();
-    void customize(const std::vector<double>& weights);
-    double query(int s, int t);
-    std::vector<int> getPath(int s, int t);
+    void customize(const std::vector<uint32_t>& upward_weights, const std::vector<uint32_t>& downward_weights);
+    uint32_t query(uint32_t s, uint32_t t);
 
 private:
-    Graph G;
-    AugmentedGraph Gplus;
-    EliminationTree ET;
+    Graph* G;
+    Graph* Gplus;
 
-    std::vector<int> rankOrder;
+    std::vector<uint32_t> rankOrder;
 
-    RankOrderer orderer;
-    ContractionBuilder builder;
+    ContractionBuilder* builder;
     BasicCustomizer* basicCustomizer;
-    PerfectCustomizer* perfectCustomizer;
     EliminationTreeQuery* queryEngine;
 };
