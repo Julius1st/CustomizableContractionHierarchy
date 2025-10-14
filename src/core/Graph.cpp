@@ -14,24 +14,39 @@ Graph::Graph(std::vector<uint32_t> &firstOut, std::vector<uint32_t> &head, std::
     m = head.size();
 }
 
+uint32_t Graph::getHead(uint32_t edgeID) const {
+    if (edgeID >= m) throw std::out_of_range("Tried to get head for Edge with ID " + std::to_string(edgeID) + " but this ID is out of bounds.");
+    return head[edgeID];
+}
+
 uint32_t Graph::getUpwardWeight(uint32_t edgeID) const {
-    if (edgeID >= n) throw std::out_of_range("Tried to get weight for Edge with ID " + std::to_string(edgeID) + " but this ID is out of bounds.");
+    if (edgeID >= m) throw std::out_of_range("Tried to get weight for Edge with ID " + std::to_string(edgeID) + " but this ID is out of bounds.");
     return upwardWeights[edgeID];
 }
 
 uint32_t Graph::getDownwardWeight(uint32_t edgeID) const {
-    if (edgeID >= n) throw std::out_of_range("Tried to get weight for Edge with ID " + std::to_string(edgeID) + " but this ID is out of bounds.");
+    if (edgeID >= m) throw std::out_of_range("Tried to get weight for Edge with ID " + std::to_string(edgeID) + " but this ID is out of bounds.");
     return downwardWeights[edgeID];
 }
 
 void Graph::setUpwardWeight(uint32_t edgeID, uint32_t weight) {
-    if (edgeID >= n) throw std::out_of_range("Tried to set weight for Edge with ID " + std::to_string(edgeID) + " but this ID is out of bounds.");
+    if (edgeID >= m) throw std::out_of_range("Tried to set weight for Edge with ID " + std::to_string(edgeID) + " but this ID is out of bounds.");
     upwardWeights[edgeID] = weight;
 }
 
 void Graph::setDownwardWeight(uint32_t edgeID, uint32_t weight) {
-    if (edgeID >= n) throw std::out_of_range("Tried to set weight for Edge with ID " + std::to_string(edgeID) + " but this ID is out of bounds.");
+    if (edgeID >= m) throw std::out_of_range("Tried to set weight for Edge with ID " + std::to_string(edgeID) + " but this ID is out of bounds.");
     upwardWeights[edgeID] = weight;
+}
+
+std::vector<uint32_t>::const_iterator Graph::beginNeighborhood(uint32_t u) const {
+    if (u >= n) throw std::out_of_range("Tried to get begin of neighborhood of node " + std::to_string(u) + " but this ID is out of bounds.");
+    return (head.begin() + firstOut[u]);
+}
+
+std::vector<uint32_t>::const_iterator Graph::endNeighborhood(uint32_t u) const {
+    if (u >= n) throw std::out_of_range("Tried to get end of neighborhood of node " + std::to_string(u) + " but this ID is out of bounds.");
+    return (head.begin() + firstOut[(u+1)]);
 }
 
 void Graph::initEliminationTree() {
@@ -39,5 +54,6 @@ void Graph::initEliminationTree() {
 }
 
 uint32_t Graph::parentOf(uint32_t node) const {
+    if (node >= n) throw std::out_of_range("Tried to get parent of node " + std::to_string(node) + " but this ID is out of bounds.");
     return eliminationTree[node];
 }

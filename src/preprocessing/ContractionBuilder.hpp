@@ -14,8 +14,8 @@ public:
     Graph* buildGplus();
 
     // These Methods are used to get the proper weight vectors for the customization phase
-    std::vector<uint32_t>* permuteWeights(std::vector<uint32_t> weights);
-    std::vector<uint32_t>* buildNewWeightsForGplus(std::vector<uint32_t> permutedWeights);
+    std::vector<uint32_t> permuteWeights(const std::vector<uint32_t>& weights);
+    std::vector<uint32_t> buildNewWeightsForGplus(const std::vector<uint32_t>& permutedWeights);
 
 private:
     const Graph* G;

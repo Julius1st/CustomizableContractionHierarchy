@@ -128,8 +128,9 @@ int main(int argc, char *argv[]) {
             throw runtime_error("The last element of first out must be the arc count.");
         if(head.empty())
             throw runtime_error("The head vector must not be empty.");
-        //if(max_element_of(head) >= node_count)
-        //    throw runtime_error("The head vector contains an out-of-bounds node id.");
+        for (unsigned int i : head) {
+            if (i >= node_count) throw runtime_error("The head vector contains an out-of-bounds node id.");
+        }
         if(weight.size() != arc_count)
             throw runtime_error("The weight vector must be as long as the number of arcs");
 
@@ -140,18 +141,24 @@ int main(int argc, char *argv[]) {
 
         cleanInputData(first_out, head, weight, clean_first_out, clean_head, clean_upward_weight, clean_downward_weight);
 
-        cout << "The input graph has been processed," << endl;
+        cout << "done" << endl;
 
         Graph* G = new Graph(clean_first_out, clean_head);
 
         CCH* cch = new CCH(G, order);
-        cout << "Beginning preprocessing." << endl;
-        cch->preprocess();
-        cout << "Beginning customization." << endl;
-        cch->customize(clean_upward_weight, clean_downward_weight);
 
+        cout << "Preprocessing Graph ... " << flush;
+        cch->preprocess();
+        cout << "done" << endl;
+
+        cout << "Customizing Graph ... " << flush;
+        cch->customize(clean_upward_weight, clean_downward_weight);
+        cout << "done" << endl;
+
+        cout << "Querying distance ... " << flush;
         // TODO
         uint32_t distance = cch->query(1, 5);
+        cout << "done" << endl;
 
         cout << "The computed distance is: " + std::to_string(distance) << endl;
 

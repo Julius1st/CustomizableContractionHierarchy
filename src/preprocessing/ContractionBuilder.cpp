@@ -5,6 +5,7 @@
 #include "ContractionBuilder.hpp"
 
 Graph* ContractionBuilder::buildGplus() {
+
     permuteNodeIDs();
     contractGraph();
 
@@ -16,7 +17,8 @@ void ContractionBuilder::permuteNodeIDs() {
     uint32_t n = G->numVertices();
     uint32_t m = G->numEdges();
     if(n != rank.size()) throw std::invalid_argument("When permuting the node IDs in the ContractionBuilder, the number of nodes did not match the size of the rank vector.");
-    permutedFirstOut.resize(n+1);
+    permutedFirstOut.resize((n+1));
+    reverseRank.resize(n);
     permutedFirstOut[n] = m;
     permutedHead.resize(m);
 
@@ -83,11 +85,11 @@ void ContractionBuilder::contractGraph() {
     Gplus = new Graph(GplusFirstOut, GplusHead, ET);
 }
 
-std::vector<uint32_t>* ContractionBuilder::permuteWeights(std::vector<uint32_t> weights) {
+std::vector<uint32_t> ContractionBuilder::permuteWeights(const std::vector<uint32_t>& weights) {
     uint32_t n = G->numVertices();
     uint32_t m = G->numEdges();
     if(m != weights.size()) throw std::invalid_argument("When permuting the weights in the ContractionBuilder, the number of weights did not match the number of edges in the original Graph.");
-    std::vector<uint32_t> permutedWeights(m);
+    std::vector<uint32_t> permutedWeights(m, 0);
 
     uint32_t currentIndex = 0;
     for (uint32_t u = 0; u < n; u++) {
@@ -98,10 +100,10 @@ std::vector<uint32_t>* ContractionBuilder::permuteWeights(std::vector<uint32_t> 
         }
     }
 
-    return &permutedWeights;
+    return permutedWeights;
 }
 
-std::vector<uint32_t>* ContractionBuilder::buildNewWeightsForGplus(std::vector<uint32_t> permutedWeights) {
+std::vector<uint32_t> ContractionBuilder::buildNewWeightsForGplus(const std::vector<uint32_t>& permutedWeights) {
     std::vector<uint32_t> newWeights(GplusHead.size(), Graph::MAX_UINT32);
 
     for (uint32_t vertex = 0; vertex < GplusFirstOut.size()-1; vertex++) {
@@ -112,7 +114,6 @@ std::vector<uint32_t>* ContractionBuilder::buildNewWeightsForGplus(std::vector<u
                 newWeights[contractedIndex] = permutedWeights[oldIndex];
                 contractedIndex++;
                 oldIndex++;
-                continue;
             } else {
                 contractedIndex++;
             }
@@ -120,5 +121,5 @@ std::vector<uint32_t>* ContractionBuilder::buildNewWeightsForGplus(std::vector<u
 
     }
 
-    return &newWeights;
+    return newWeights;
 }
