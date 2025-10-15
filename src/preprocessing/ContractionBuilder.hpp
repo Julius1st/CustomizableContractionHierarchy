@@ -9,7 +9,7 @@
 // Builds the Augmented Graph G+ and the elimination tree
 class ContractionBuilder {
 public:
-    ContractionBuilder(Graph* g, std::vector<uint32_t>& rankOrder) : G(g), rank(rankOrder) {}
+    ContractionBuilder(Graph* g, std::vector<uint32_t>& rankOrder) : G(g), order(rankOrder) {}
 
     Graph* buildGplus();
 
@@ -20,13 +20,14 @@ public:
 private:
     const Graph* G;
     Graph* Gplus;
-    std::vector<uint32_t> rank;
+    std::vector<uint32_t> rank; // rank[oldID] = newID
     std::vector<uint32_t> permutedFirstOut;
     std::vector<uint32_t> permutedHead;
-    std::vector<uint32_t> reverseRank;
+    std::vector<uint32_t> order; // order[newID] = oldID
     std::vector<uint32_t> GplusHead;
     std::vector<uint32_t> GplusFirstOut;
 
     void permuteNodeIDs();
     void contractGraph();
+    uint32_t findEdgeInOriginal(uint32_t lowerOld, uint32_t upperOld);
 };

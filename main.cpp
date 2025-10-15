@@ -1,5 +1,6 @@
 #include <iostream>
 #include <stdexcept>
+#include <chrono>
 #include "CCH.hpp"
 #include "VectorIO.h"
 
@@ -145,20 +146,27 @@ int main(int argc, char *argv[]) {
 
         Graph* G = new Graph(clean_first_out, clean_head);
 
-        CCH* cch = new CCH(G, order);
 
+
+        CCH* cch = new CCH(G, order);
+        std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
         cout << "Preprocessing Graph ... " << flush;
         cch->preprocess();
-        cout << "done" << endl;
+        std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+        cout << "done, time in milliseconds: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << endl;
 
         cout << "Customizing Graph ... " << flush;
+        begin = std::chrono::steady_clock::now();
         cch->customize(clean_upward_weight, clean_downward_weight);
-        cout << "done" << endl;
+        end = std::chrono::steady_clock::now();
+        cout << "done, time in milliseconds: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << endl;
 
         cout << "Querying distance ... " << flush;
         // TODO
+        begin = std::chrono::steady_clock::now();
         uint32_t distance = cch->query(1, 5);
-        cout << "done" << endl;
+        end = std::chrono::steady_clock::now();
+        cout << "done, time in milliseconds: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << endl;
 
         cout << "The computed distance is: " + std::to_string(distance) << endl;
 
