@@ -88,7 +88,7 @@ void ContractionBuilder::contractGraph() {
         ET[u] = v;
     }
 
-    // Build G
+    // Build Gplus
     GplusFirstOut.resize(G->numVertices() + 1);
     uint32_t currentIndex = 0;
 

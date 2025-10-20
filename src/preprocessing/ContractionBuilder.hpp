@@ -16,6 +16,7 @@ public:
     // These Methods are used to get the proper weight vectors for the customization phase
     std::vector<uint32_t> permuteWeights(const std::vector<uint32_t>& weights);
     std::vector<uint32_t> buildNewWeightsForGplus(const std::vector<uint32_t>& permutedWeights);
+    uint32_t getRank(uint32_t u) {return rank[u];} // rank[oldID] = newID
 
 private:
     const Graph* G;

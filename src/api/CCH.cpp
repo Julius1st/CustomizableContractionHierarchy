@@ -3,7 +3,7 @@
 //
 #include "CCH.hpp"
 
-CCH::CCH(Graph* baseGraph, std::vector<uint32_t> &rank) : G(baseGraph), rankOrder(rank) {
+CCH::CCH(Graph* baseGraph, std::vector<uint32_t> &order) : G(baseGraph), rankOrder(order) {
     builder = new ContractionBuilder(G, rankOrder);
 }
 
@@ -27,5 +27,5 @@ void CCH::customize(const std::vector<uint32_t> &upward_weights, const std::vect
 }
 
 uint32_t CCH::query(uint32_t s, uint32_t t) {
-    return queryEngine->query(s, t);
+    return queryEngine->query(builder->getRank(s), builder->getRank(t));
 }

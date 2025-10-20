@@ -1,6 +1,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <chrono>
+#include <queue>
 #include "CCH.hpp"
 #include "VectorIO.h"
 
@@ -12,13 +13,19 @@ struct UndirectedEdge {
     uint32_t w_down; // weight from b->a
 };
 
+struct DirectedEdge {
+    uint32_t a, b;
+    uint32_t weight; // weight from a->b
+};
+
 void cleanInputData(vector<uint32_t>& in_first_out,
                     vector<uint32_t>& in_head,
                     vector<uint32_t>& in_weight,
                     vector<uint32_t>& clean_first_out,
                     vector<uint32_t>& clean_head,
                     vector<uint32_t>& clean_upward_weight,
-                    vector<uint32_t>& clean_downward_weight) {
+                    vector<uint32_t>& clean_downward_weight,
+                    vector<vector<DirectedEdge>>& adj) {
 
     uint32_t missing_weight = 0xFFFFFFFF;
     const size_t n = in_first_out.size() - 1;
@@ -79,11 +86,43 @@ void cleanInputData(vector<uint32_t>& in_first_out,
         clean_head.push_back(e.b);
         clean_upward_weight.push_back(e.w_up);
         clean_downward_weight.push_back(e.w_down);
+
+        // Build bidirectional adj list used for Dijkstra
+        adj[e.a].push_back({e.a, e.b, e.w_up});
+        adj[e.b].push_back({e.b, e.a, e.w_down});
     }
 
     // Prefix-sum first_out
     for (size_t i = 1; i <= n; ++i)
         clean_first_out[i] += clean_first_out[i - 1];
+}
+
+uint32_t dijkstra(uint32_t s, uint32_t t, vector<vector<DirectedEdge>> adj) {
+    uint32_t n = adj.size();
+    uint32_t infinity = 0xFFFFFFFF;
+    vector<uint32_t> dist(n, infinity);
+    vector<uint32_t> predecessor(n, infinity);
+    dist[s] = 0;
+    priority_queue<pair<uint32_t, uint32_t>, vector<pair<uint32_t, uint32_t>>, greater<pair<uint32_t, uint32_t>> > pq;
+
+    pq.push({0, s});
+    while (!pq.empty()) {
+        uint32_t u = pq.top().second;
+        pq.pop();
+
+        if (u == t) return dist[t];
+
+        for (auto it = adj[u].begin(); it != adj[u].end(); it++) {
+            uint32_t v = it->b;
+            uint32_t weight = it->weight;
+            if (dist[v] > dist[u] + weight) {
+                dist[v] = dist[u] + weight;
+                pq.push({dist[v], v});
+            }
+        }
+    }
+
+    return dist[t];
 }
 
 int main(int argc, char *argv[]) {
@@ -139,8 +178,10 @@ int main(int argc, char *argv[]) {
         vector<uint32_t> clean_head;
         vector<uint32_t> clean_upward_weight;
         vector<uint32_t> clean_downward_weight;
+        vector<vector<DirectedEdge>> adj;
+        adj.resize(node_count);
 
-        cleanInputData(first_out, head, weight, clean_first_out, clean_head, clean_upward_weight, clean_downward_weight);
+        cleanInputData(first_out, head, weight, clean_first_out, clean_head, clean_upward_weight, clean_downward_weight, adj);
 
         cout << "done" << endl;
 
@@ -161,14 +202,19 @@ int main(int argc, char *argv[]) {
         end = std::chrono::steady_clock::now();
         cout << "done, time in milliseconds: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << endl;
 
+        uint32_t s = 1;
+        uint32_t t = 5;
+
         cout << "Querying distance ... " << flush;
         // TODO
         begin = std::chrono::steady_clock::now();
-        uint32_t distance = cch->query(1, 5);
+        uint32_t distance = cch->query(s, t);
         end = std::chrono::steady_clock::now();
         cout << "done, time in milliseconds: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << endl;
 
         cout << "The computed distance is: " + std::to_string(distance) << endl;
+
+        cout << "The with dijkstra computed distance is: " + std::to_string(dijkstra(s, t, adj)) << std::endl;
 
     }catch(exception&err){
         cerr << "Stopped on exception : " << err.what() << endl;

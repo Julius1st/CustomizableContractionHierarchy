@@ -13,7 +13,7 @@
 // Facade Class
 class CCH {
 public:
-    explicit CCH(Graph* baseGraph, std::vector<uint32_t>& rankOrder);
+    explicit CCH(Graph* baseGraph, std::vector<uint32_t>& order);
 
     void preprocess();
     void customize(const std::vector<uint32_t>& upward_weights, const std::vector<uint32_t>& downward_weights);
