@@ -9,7 +9,7 @@
 
 class Graph {
 public:
-    inline static const uint32_t MAX_UINT32 = 0xFFFFFFFF;
+    inline static const uint32_t INFINITY = 0xFFFFFFFF / 2 - 1;
 
     Graph(std::vector<uint32_t>& firstOut, std::vector<uint32_t>& head);
     Graph(std::vector<uint32_t>& firstOut, std::vector<uint32_t>& head, std::vector<uint32_t>& eliminationTree);
