@@ -36,7 +36,7 @@ void Graph::setUpwardWeight(uint32_t edgeID, uint32_t weight) {
 
 void Graph::setDownwardWeight(uint32_t edgeID, uint32_t weight) {
     if (edgeID >= m) throw std::out_of_range("Tried to set weight for Edge with ID " + std::to_string(edgeID) + " but this ID is out of bounds.");
-    upwardWeights[edgeID] = weight;
+    downwardWeights[edgeID] = weight;
 }
 
 std::vector<uint32_t>::const_iterator Graph::beginNeighborhood(uint32_t u) const {
@@ -50,7 +50,7 @@ std::vector<uint32_t>::const_iterator Graph::endNeighborhood(uint32_t u) const {
 }
 
 void Graph::initEliminationTree() {
-    eliminationTree.assign(n, MAX_UINT32);
+    eliminationTree.assign(n, INFINITY);
 }
 
 uint32_t Graph::parentOf(uint32_t node) const {

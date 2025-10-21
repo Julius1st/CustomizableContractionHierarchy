@@ -5,25 +5,25 @@
 #include "EliminationTreeQuery.hpp"
 
 EliminationTreeQuery::EliminationTreeQuery(Graph *g) : G(g){
-    distUp = std::vector<uint32_t> (G->numVertices(), Graph::MAX_UINT32);
-    distDown = std::vector<uint32_t> (G->numVertices(), Graph::MAX_UINT32);
+    distUp = std::vector<uint32_t> (G->numVertices(), Graph::INFINITY);
+    distDown = std::vector<uint32_t> (G->numVertices(), Graph::INFINITY);
 }
 
 uint32_t EliminationTreeQuery::query(uint32_t s, uint32_t t) {
     while (s != t) {
         if (s < t) {
-            ProcessVertexUp(s, Graph::MAX_UINT32);
+            ProcessVertexUp(s, Graph::INFINITY);
             s = G->parentOf(s);
         } else {
-            ProcessVertexDown(t, Graph::MAX_UINT32);
+            ProcessVertexDown(t, Graph::INFINITY);
             t = G->parentOf(t);
         }
     }
 
-    uint32_t d = Graph::MAX_UINT32;
+    uint32_t d = Graph::INFINITY;
     uint32_t u = s;
 
-    while (u != Graph::MAX_UINT32) {
+    while (u != Graph::INFINITY) {
         d = std::min(d, distUp[u] + distDown[u]);
         ProcessVertexUp(u, d);
         ProcessVertexDown(u, d);
@@ -42,7 +42,7 @@ void EliminationTreeQuery::ProcessVertexUp(uint32_t u, uint32_t d) {
             distUp[v] = std::min(distUp[v], distUp[u] + G->getUpwardWeight(uvIndex));
         }
     }
-    distUp[u] = Graph::MAX_UINT32;
+    distUp[u] = Graph::INFINITY;
 }
 
 void EliminationTreeQuery::ProcessVertexDown(uint32_t u, uint32_t d) {
@@ -54,5 +54,5 @@ void EliminationTreeQuery::ProcessVertexDown(uint32_t u, uint32_t d) {
             distDown[v] = std::min(distDown[v], distDown[u] + G->getDownwardWeight(uvIndex));
         }
     }
-    distDown[u] = Graph::MAX_UINT32;
+    distDown[u] = Graph::INFINITY;
 }

@@ -27,7 +27,7 @@ void cleanInputData(vector<uint32_t>& in_first_out,
                     vector<uint32_t>& clean_downward_weight,
                     vector<vector<DirectedEdge>>& adj) {
 
-    uint32_t missing_weight = 0xFFFFFFFF;
+    uint32_t missing_weight = 0xFFFFFFFF/2 -1;
     const size_t n = in_first_out.size() - 1;
     vector<UndirectedEdge> edges;
 
@@ -63,10 +63,10 @@ void cleanInputData(vector<uint32_t>& in_first_out,
         uint32_t best_down = edges[i].w_down;
 
         while (j < edges.size() && edges[j].a == a && edges[j].b == b) {
-            if (edges[j].w_up)
-                best_up = min(best_up, edges[j].w_up);
-            if (edges[j].w_down)
-                best_down = min(best_down, edges[j].w_down);
+            if (edges[j].w_up != missing_weight)
+                best_up = (best_up == missing_weight) ? edges[j].w_up : std::min(best_up, edges[j].w_up);
+            if (edges[j].w_down != missing_weight)
+                best_down = (best_down == missing_weight) ? edges[j].w_down : std::min(best_down, edges[j].w_down);
             ++j;
         }
 
@@ -99,7 +99,7 @@ void cleanInputData(vector<uint32_t>& in_first_out,
 
 uint32_t dijkstra(uint32_t s, uint32_t t, vector<vector<DirectedEdge>> adj) {
     uint32_t n = adj.size();
-    uint32_t infinity = 0xFFFFFFFF;
+    uint32_t infinity = 0xFFFFFFFF/2 -1;
     vector<uint32_t> dist(n, infinity);
     vector<uint32_t> predecessor(n, infinity);
     dist[s] = 0;
@@ -186,7 +186,6 @@ int main(int argc, char *argv[]) {
         cout << "done" << endl;
 
         Graph* G = new Graph(clean_first_out, clean_head);
-
 
 
         CCH* cch = new CCH(G, order);
