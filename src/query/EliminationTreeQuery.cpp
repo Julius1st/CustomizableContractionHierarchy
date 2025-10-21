@@ -10,6 +10,8 @@ EliminationTreeQuery::EliminationTreeQuery(Graph *g) : G(g){
 }
 
 uint32_t EliminationTreeQuery::query(uint32_t s, uint32_t t) {
+    distUp[s] = 0;
+    distDown[t] = 0;
     while (s != t) {
         if (s < t) {
             ProcessVertexUp(s, Graph::INFINITY);

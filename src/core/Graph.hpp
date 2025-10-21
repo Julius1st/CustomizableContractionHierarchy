@@ -33,6 +33,13 @@ public:
     void initEliminationTree();
     uint32_t parentOf(uint32_t node) const;
 
+    // only for testing:
+    auto getFirstOut() const { return firstOut; }
+    auto getHead() const { return head; }
+    auto getUpwardWeights() const { return upwardWeights; }
+    auto getDownwardWeights() const { return downwardWeights; }
+    auto getEliminationTree() const { return eliminationTree; }
+
 private:
     uint32_t n; // Number of Vertices
     uint32_t m; // Number of Edges

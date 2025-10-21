@@ -64,7 +64,7 @@ void ContractionBuilder::permuteNodeIDs() {
 void ContractionBuilder::contractGraph() {
     std::vector<uint32_t> contractedHead;
     std::vector<std::vector<uint32_t>> adj(G->numVertices());
-    std::vector<uint32_t> ET(G->numVertices(), Graph::MAX_UINT32);
+    std::vector<uint32_t> ET(G->numVertices(), Graph::INFINITY);
 
     // Build Adjacency list
     for (uint32_t u = 0; u < G->numVertices(); u++) {
@@ -116,7 +116,7 @@ uint32_t ContractionBuilder::findEdgeInOriginal(uint32_t lowerOld, uint32_t uppe
 
 std::vector<uint32_t> ContractionBuilder::permuteWeights(const std::vector<uint32_t>& weights) {
     const uint32_t n = G->numVertices();
-    std::vector<uint32_t> permutedWeights(permutedHead.size(), Graph::MAX_UINT32);
+    std::vector<uint32_t> permutedWeights(permutedHead.size(), Graph::INFINITY);
 
     for (uint32_t newU = 0; newU < n; ++newU) {
         uint32_t begin = permutedFirstOut[newU];
@@ -144,7 +144,7 @@ std::vector<uint32_t> ContractionBuilder::permuteWeights(const std::vector<uint3
 }
 
 std::vector<uint32_t> ContractionBuilder::buildNewWeightsForGplus(const std::vector<uint32_t>& permutedWeights) {
-    std::vector<uint32_t> newWeights(GplusHead.size(), Graph::MAX_UINT32);
+    std::vector<uint32_t> newWeights(GplusHead.size(), Graph::INFINITY);
 
     for (uint32_t vertex = 0; vertex < GplusFirstOut.size()-1; vertex++) {
         uint32_t contractedIndex = GplusFirstOut[vertex];
