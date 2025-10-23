@@ -97,12 +97,12 @@ void cleanInputData(vector<uint32_t>& in_first_out,
         clean_first_out[i] += clean_first_out[i - 1];
 }
 
-uint32_t dijkstra(uint32_t s, uint32_t t, vector<vector<DirectedEdge>> adj) {
+uint32_t dijkstra(uint32_t s, uint32_t t, vector<vector<DirectedEdge>> adj, vector<uint32_t>& predecessor, vector<uint32_t>& hop_count) {
     uint32_t n = adj.size();
     uint32_t infinity = 0xFFFFFFFF/2 -1;
     vector<uint32_t> dist(n, infinity);
-    vector<uint32_t> predecessor(n, infinity);
     dist[s] = 0;
+    hop_count[s] = 0;
     priority_queue<pair<uint32_t, uint32_t>, vector<pair<uint32_t, uint32_t>>, greater<pair<uint32_t, uint32_t>> > pq;
 
     pq.push({0, s});
@@ -117,6 +117,8 @@ uint32_t dijkstra(uint32_t s, uint32_t t, vector<vector<DirectedEdge>> adj) {
             uint32_t weight = it->weight;
             if (dist[v] > dist[u] + weight) {
                 dist[v] = dist[u] + weight;
+                predecessor[v] = u;
+                hop_count[v] = hop_count[u] + 1;
                 pq.push({dist[v], v});
             }
         }
@@ -185,7 +187,7 @@ int main(int argc, char *argv[]) {
 
         cout << "done" << endl;
 
-        Graph* G = new Graph(clean_first_out, clean_head);
+        Graph* G = new Graph(clean_first_out, clean_head, clean_upward_weight, clean_downward_weight);
 
 
         CCH* cch = new CCH(G, order);
@@ -197,23 +199,117 @@ int main(int argc, char *argv[]) {
 
         cout << "Customizing Graph ... " << flush;
         begin = std::chrono::steady_clock::now();
-        cch->customize(clean_upward_weight, clean_downward_weight);
+        cch->customize();
         end = std::chrono::steady_clock::now();
         cout << "done, time in milliseconds: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << endl;
 
-        uint32_t s = 1;
-        uint32_t t = 5;
-
-        cout << "Querying distance ... " << flush;
-        // TODO
+        cout << "Querying distances ... " << endl << flush;
         begin = std::chrono::steady_clock::now();
-        uint32_t distance = cch->query(s, t);
+
+        vector<uint32_t> predecessor(G->numVertices(), Graph::INFINITY);
+        vector<uint32_t> hop_count(G->numVertices(), Graph::INFINITY);
+        uint32_t s;
+        uint32_t t;
+        uint32_t dijkstra_distance;
+        uint32_t cch_distance;
+        for (int i = 0; i < 1000; i++) {
+            s = rand() % node_count;
+            t = rand() % node_count;
+            dijkstra_distance = dijkstra(s, t, adj, predecessor, hop_count);
+            cch_distance = cch->query(s, t);
+            if (dijkstra_distance != cch_distance) {
+                cout << "Distances do not match for query from " << std::to_string(s) << " to " << std::to_string(t) <<
+                     ": Dijkstra = " << std::to_string(dijkstra_distance) <<
+                     ", CCH = " << std::to_string(cch_distance) << " Hop_Count: " << std::to_string(hop_count[t]) << endl;
+            }
+        }
+
+        cout << "Dijkstra distance: " << dijkstra_distance << " CCH distance: " << cch_distance << endl;
         end = std::chrono::steady_clock::now();
         cout << "done, time in milliseconds: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << endl;
 
-        cout << "The computed distance is: " + std::to_string(distance) << endl;
 
-        cout << "The with dijkstra computed distance is: " + std::to_string(dijkstra(s, t, adj)) << std::endl;
+        return 0;
+
+        Graph* Gplus = cch->getGplus();
+        vector<uint32_t> rank = cch->getRank();
+        cout << "Path from " << s << " to " << t << " : " << flush;
+        vector<uint32_t> path;
+        if (dijkstra_distance == Graph::INFINITY) {
+            cout << "no path found." << endl;
+        } else {
+            for (uint32_t v = t; v != Graph::INFINITY; v = predecessor[v]) {
+                path.push_back(v);
+            }
+            reverse(path.begin(), path.end());
+            for (size_t i = 0; i < path.size(); ++i) {
+                cout << path[i];
+                if (i + 1 < path.size()) cout << " -> ";
+            }
+            cout << endl;
+        }
+
+        cout << "Weights along the path, computed by dijkstra: " << flush;
+        if (dijkstra_distance == Graph::INFINITY) {
+            cout << "no weights." << endl;
+        } else {
+            for (size_t i = 0; i + 1 < path.size(); ++i) {
+                uint32_t u = path[i];
+                uint32_t v = path[i + 1];
+                // find weight from u to v
+                uint32_t weight = Graph::INFINITY;
+                for (auto& edge : adj[u]) {
+                    if (edge.b == v) {
+                        weight = edge.weight;
+                        break;
+                    }
+                }
+                cout << weight;
+                if (i + 2 < path.size()) cout << ", ";
+            }
+            cout << endl;
+        }
+
+        cout << "Weights along the dijkstra-path, computed by CCH: " << flush;
+        if (cch_distance == Graph::INFINITY) {
+            cout << "no weights." << endl;
+        } else {
+            for (size_t i = 0; i + 1 < path.size(); ++i) {
+                uint32_t u = rank[path[i]];
+                uint32_t v = rank[path[i + 1]];
+                // find weight from u to v
+                uint32_t weight = Graph::INFINITY;
+                // determine if u->v is upward or downward in CCH
+                if (u < v) {
+                    // upward
+                    for (auto it = Gplus->beginNeighborhood(u); it != Gplus->endNeighborhood(u); it++) {
+                        uint32_t head = *it;
+                        if (head == v) {
+                            uint32_t edgeIndex = std::distance(Gplus->beginNeighborhood(0), it);
+                            weight = Gplus->getUpwardWeight(edgeIndex);
+                            break;
+                        }
+                    }
+                } else {
+                    // downward
+                    for (auto it = Gplus->beginNeighborhood(u); it != Gplus->endNeighborhood(u); it++) {
+                        uint32_t head = *it;
+                        if (head == v) {
+                            uint32_t edgeIndex = std::distance(Gplus->beginNeighborhood(0), it);
+                            weight = Gplus->getDownwardWeight(edgeIndex);
+                            break;
+                        }
+                    }
+                }
+                cout << weight;
+                if (i + 2 < path.size()) cout << ", ";
+            }
+            cout << endl;
+        }
+
+
+
+        // cch infinity: 12316 3035
 
     }catch(exception&err){
         cerr << "Stopped on exception : " << err.what() << endl;

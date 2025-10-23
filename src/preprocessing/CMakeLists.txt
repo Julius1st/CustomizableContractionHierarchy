@@ -1,5 +1,4 @@
 add_library(cch_preprocessing
-        RankOrderer.cpp
         ContractionBuilder.cpp
 )
 
