@@ -13,10 +13,10 @@ public:
 
     Graph* buildGplus();
 
-    // These Methods are used to get the proper weight vectors for the customization phase
-    std::vector<uint32_t> permuteWeights(const std::vector<uint32_t>& weights);
-    std::vector<uint32_t> buildNewWeightsForGplus(const std::vector<uint32_t>& permutedWeights);
     uint32_t getRank(uint32_t u) {return rank[u];} // rank[oldID] = newID
+
+    // just for testing
+    std::vector<uint32_t> getRank(){ return rank; }
 
 private:
     const Graph* G;
@@ -27,8 +27,11 @@ private:
     std::vector<uint32_t> order; // order[newID] = oldID
     std::vector<uint32_t> GplusHead;
     std::vector<uint32_t> GplusFirstOut;
+    std::vector<uint32_t> GplusUpwardWeights;
+    std::vector<uint32_t> GplusDownwardWeights;
+    // Temporary adjacency for new graph tuple: (head, upWeight, downWeight)
+    std::vector<std::vector<std::tuple<uint32_t, uint32_t, uint32_t>>> adj;
 
     void permuteNodeIDs();
     void contractGraph();
-    uint32_t findEdgeInOriginal(uint32_t lowerOld, uint32_t upperOld);
 };

@@ -12,14 +12,7 @@ void CCH::preprocess() {
     basicCustomizer = new BasicCustomizer(Gplus);
 }
 
-void CCH::customize(const std::vector<uint32_t> &upward_weights, const std::vector<uint32_t> &downward_weights) {
-    std::vector<uint32_t> Gplus_upward_weights = builder->buildNewWeightsForGplus(
-                            builder->permuteWeights(upward_weights));
-    std::vector<uint32_t> Gplus_downward_weights = builder->buildNewWeightsForGplus(
-                            builder->permuteWeights(downward_weights));
-
-    Gplus->setUpwardWeights(Gplus_upward_weights);
-    Gplus->setDownwardWeights(Gplus_downward_weights);
+void CCH::customize() {
 
     basicCustomizer->run();
 

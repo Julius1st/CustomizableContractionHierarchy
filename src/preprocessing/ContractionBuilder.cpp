@@ -3,6 +3,7 @@
 //
 
 #include "ContractionBuilder.hpp"
+#include <iostream>
 
 Graph* ContractionBuilder::buildGplus() {
 
@@ -14,7 +15,6 @@ Graph* ContractionBuilder::buildGplus() {
 
 void ContractionBuilder::permuteNodeIDs() {
     uint32_t n = G->numVertices();
-    uint32_t m = G->numEdges();
 
     if (n != order.size()) throw std::invalid_argument("permuteNodeIDs: order.size() does not match number of vertices");
 
@@ -23,13 +23,15 @@ void ContractionBuilder::permuteNodeIDs() {
     for (uint32_t newID = 0; newID < n; ++newID)
         rank[order[newID]] = newID;
 
-    // Temporary adjacency for new graph
-    std::vector<std::vector<uint32_t>> adj(n);
+    adj.resize(n);
 
     // Iterate over original edges (edges only at lower old ID)
     for (uint32_t oldU = 0; oldU < n; ++oldU) {
         for (auto it = G->beginNeighborhood(oldU); it != G->endNeighborhood(oldU); ++it) {
             uint32_t oldV = *it;
+            uint32_t upWeight = G->getUpwardWeight(std::distance(G->beginNeighborhood(0), it));
+            uint32_t downWeight = G->getDownwardWeight(std::distance(G->beginNeighborhood(0), it));
+
             // should not happen:
             if (oldU >= oldV) throw std::invalid_argument("permuteNodeIDs: duplicate or self loop discovered");
 
@@ -37,129 +39,102 @@ void ContractionBuilder::permuteNodeIDs() {
             uint32_t newU = rank[oldU];
             uint32_t newV = rank[oldV];
 
+            if (newU > newV) {
+                // edge is downward in new graph
+                std::swap(upWeight, downWeight);
+            }
+
             // Store only at lower new ID
             uint32_t lower = std::min(newU, newV);
             uint32_t upper = std::max(newU, newV);
-            adj[lower].push_back(upper);
+            adj[lower].emplace_back(upper, upWeight, downWeight);
         }
     }
 
-    // Build firstOut and head arrays
-    permutedFirstOut.assign(n + 1, 0);
-    permutedHead.clear();
-
-    // Count edges
-    for (uint32_t u = 0; u < n; ++u)
-        permutedFirstOut[u + 1] = permutedFirstOut[u] + adj[u].size();
-
-    permutedHead.reserve(permutedFirstOut.back());
-    for (uint32_t u = 0; u < n; ++u) {
-        auto& neigh = adj[u];
-        std::sort(neigh.begin(), neigh.end());
-        for (uint32_t v : neigh)
-            permutedHead.push_back(v);
+    for (auto& neigh : adj) {
+        // Remove multi-edges by sorting and unique
+        std::sort(neigh.begin(), neigh.end(), [](const auto& e1, const auto& e2) {
+            return std::get<0>(e1) < std::get<0>(e2);
+        });
     }
 }
 
 void ContractionBuilder::contractGraph() {
-    std::vector<uint32_t> contractedHead;
-    std::vector<std::vector<uint32_t>> adj(G->numVertices());
-    std::vector<uint32_t> ET(G->numVertices(), Graph::INFINITY);
+    uint32_t n = G->numVertices();
+    std::vector<uint32_t> ET(n, Graph::INFINITY);
+    std::vector<std::vector<uint32_t>> weightlessAdj(n);
 
-    // Build Adjacency list
-    for (uint32_t u = 0; u < G->numVertices(); u++) {
-        for (uint32_t i = permutedFirstOut[u]; i < permutedFirstOut[u+1]; i++) {
-            adj[u].push_back(permutedHead[i]);
+    // build adjacency list only containing heads for contraction
+    for (uint32_t u = 0; u < n; u++) {
+        std::vector<uint32_t> neighborsU;
+        for (auto& tuple : adj[u]) {
+            uint32_t h = std::get<0>(tuple);
+            neighborsU.push_back(h);
         }
+        weightlessAdj[u] = neighborsU;
     }
 
     // Do contraction
-    for (uint32_t u = 0; u < G->numVertices(); u++) {
-        std::vector<uint32_t>& neighborsU = adj[u];
+    for (uint32_t u = 0; u < n; u++) {
+        std::vector<uint32_t>& neighborsU = weightlessAdj[u];
         if (neighborsU.empty()) continue;
 
         std::sort(neighborsU.begin(), neighborsU.end());
         neighborsU.erase(unique(neighborsU.begin(), neighborsU.end()), neighborsU.end());
 
         uint32_t v = neighborsU[0];
-        adj[v].insert(adj[v].end(), (neighborsU.begin() +1), neighborsU.end());
+        weightlessAdj[v].insert(weightlessAdj[v].end(), (neighborsU.begin() +1), neighborsU.end());
 
         // Build Elimination Tree
         ET[u] = v;
     }
 
     // Build Gplus
-    GplusFirstOut.resize(G->numVertices() + 1);
+    GplusFirstOut.resize(n + 1);
+    GplusHead.clear();
     uint32_t currentIndex = 0;
 
-    for (uint32_t u = 0; u < G->numVertices(); u++) {
+    for (uint32_t u = 0; u < n; u++) {
         GplusFirstOut[u] = currentIndex;
-        for (uint32_t h : adj[u]) {
-            GplusHead.push_back(h);
-            currentIndex++;
-        }
-    }
 
-    GplusFirstOut[G->numVertices()] = GplusHead.size();
-    Gplus = new Graph(GplusFirstOut, GplusHead, ET);
-}
+        uint32_t weightLessIndex = 0;
+        uint32_t weightedIndex = 0;
+        while (weightLessIndex < weightlessAdj[u].size()) {
+            if (weightedIndex >= adj[u].size()) {
+                // remaining edges only in weightlessAdj
+                uint32_t h_weightless = weightlessAdj[u][weightLessIndex];
+                GplusHead.push_back(h_weightless);
+                GplusUpwardWeights.push_back(Graph::INFINITY);
+                GplusDownwardWeights.push_back(Graph::INFINITY);
+                currentIndex++;
+                weightLessIndex++;
+                continue;
+            }
 
-uint32_t ContractionBuilder::findEdgeInOriginal(uint32_t lowerOld, uint32_t upperOld) {
-    auto firstHead = G->beginNeighborhood(0);
+            uint32_t h_weightless = weightlessAdj[u][weightLessIndex];
+            uint32_t h_weighted = std::get<0>(adj[u][weightedIndex]);
 
-    for (auto it = G->beginNeighborhood(lowerOld); it < G->endNeighborhood(lowerOld); it++) {
-        if (*it == upperOld) return std::distance(firstHead, it);
-    }
-
-    throw std::runtime_error("findEdgeInOriginal: tried to find a non existing edge.");
-}
-
-std::vector<uint32_t> ContractionBuilder::permuteWeights(const std::vector<uint32_t>& weights) {
-    const uint32_t n = G->numVertices();
-    std::vector<uint32_t> permutedWeights(permutedHead.size(), Graph::INFINITY);
-
-    for (uint32_t newU = 0; newU < n; ++newU) {
-        uint32_t begin = permutedFirstOut[newU];
-        uint32_t end = permutedFirstOut[newU + 1];
-
-        for (uint32_t idx = begin; idx < end; ++idx) {
-            uint32_t newV = permutedHead[idx];
-
-            // map both endpoints back to old IDs
-            uint32_t oldU = order[newU];
-            uint32_t oldV = order[newV];
-
-            // edges in original graph are always stored at the lower old ID
-            uint32_t lowerOld = (oldU < oldV) ? oldU : oldV;
-            uint32_t upperOld = (oldU < oldV) ? oldV : oldU;
-
-            // find edge position in original adjacency
-            uint32_t pos = findEdgeInOriginal(lowerOld, upperOld);
-
-            permutedWeights[idx] = weights[pos];  // copy original weight
-        }
-    }
-
-    return permutedWeights;
-}
-
-std::vector<uint32_t> ContractionBuilder::buildNewWeightsForGplus(const std::vector<uint32_t>& permutedWeights) {
-    std::vector<uint32_t> newWeights(GplusHead.size(), Graph::INFINITY);
-
-    for (uint32_t vertex = 0; vertex < GplusFirstOut.size()-1; vertex++) {
-        uint32_t contractedIndex = GplusFirstOut[vertex];
-        uint32_t oldIndex = permutedFirstOut[vertex];
-        while (oldIndex != permutedFirstOut[vertex+1]) {
-            if (GplusHead[contractedIndex] == permutedHead[oldIndex]) {
-                newWeights[contractedIndex] = permutedWeights[oldIndex];
-                contractedIndex++;
-                oldIndex++;
+            if (h_weightless == h_weighted) {
+                // edge exists in both, add to Gplus
+                GplusHead.push_back(h_weighted);
+                GplusUpwardWeights.push_back(std::get<1>(adj[u][weightedIndex]));
+                GplusDownwardWeights.push_back(std::get<2>(adj[u][weightedIndex]));
+                currentIndex++;
+                weightLessIndex++;
+                weightedIndex++;
+            } else if (h_weightless < h_weighted) {
+                // edge only in weightless, add to Gplus with infinite weights
+                GplusHead.push_back(h_weightless);
+                GplusUpwardWeights.push_back(Graph::INFINITY);
+                GplusDownwardWeights.push_back(Graph::INFINITY);
+                currentIndex++;
+                weightLessIndex++;
             } else {
-                contractedIndex++;
+                throw std::runtime_error("contractGraph: inconsistency between weightless and weighted adjacency detected.");
             }
         }
-
     }
-
-    return newWeights;
+    GplusFirstOut[n] = GplusHead.size();
+    GplusFirstOut[n] = GplusHead.size();
+    Gplus = new Graph(GplusFirstOut, GplusHead, GplusUpwardWeights, GplusDownwardWeights, ET);
 }
