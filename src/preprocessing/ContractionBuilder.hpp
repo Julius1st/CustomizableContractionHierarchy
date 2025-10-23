@@ -12,18 +12,12 @@ public:
     ContractionBuilder(Graph* g, std::vector<uint32_t>& rankOrder) : G(g), order(rankOrder) {}
 
     Graph* buildGplus();
-
     uint32_t getRank(uint32_t u) {return rank[u];} // rank[oldID] = newID
-
-    // just for testing
-    std::vector<uint32_t> getRank(){ return rank; }
 
 private:
     const Graph* G;
     Graph* Gplus;
     std::vector<uint32_t> rank; // rank[oldID] = newID
-    std::vector<uint32_t> permutedFirstOut;
-    std::vector<uint32_t> permutedHead;
     std::vector<uint32_t> order; // order[newID] = oldID
     std::vector<uint32_t> GplusHead;
     std::vector<uint32_t> GplusFirstOut;

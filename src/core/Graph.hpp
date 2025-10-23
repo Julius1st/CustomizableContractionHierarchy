@@ -14,8 +14,6 @@ public:
     Graph(std::vector<uint32_t>& firstOut, std::vector<uint32_t>& head, std::vector<uint32_t>& upwardWeights, std::vector<uint32_t>& downwardWeights);
     Graph(std::vector<uint32_t>& firstOut, std::vector<uint32_t>& head, std::vector<uint32_t>& upwardWeights, std::vector<uint32_t>& downwardWeights, std::vector<uint32_t>& eliminationTree);
 
-    uint32_t test(uint32_t id) {return firstOut[id];}
-
     uint32_t numVertices() const { return n;}
     uint32_t getHead(uint32_t edgeID) const;
     uint32_t getUpwardWeight(uint32_t edgeID) const; // the edgeID corresponds to the index the edge Head has in the head vector.
@@ -28,13 +26,6 @@ public:
 
     void initEliminationTree();
     uint32_t parentOf(uint32_t node) const;
-
-    // only for testing:
-    auto getFirstOut() const { return firstOut; }
-    auto getHead() const { return head; }
-    auto getUpwardWeights() const { return upwardWeights; }
-    auto getDownwardWeights() const { return downwardWeights; }
-    auto getEliminationTree() const { return eliminationTree; }
 
 private:
     uint32_t n; // Number of Vertices

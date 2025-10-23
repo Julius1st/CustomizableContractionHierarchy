@@ -13,9 +13,7 @@ void CCH::preprocess() {
 }
 
 void CCH::customize() {
-
     basicCustomizer->run();
-
     queryEngine = new EliminationTreeQuery(Gplus);
 }
 

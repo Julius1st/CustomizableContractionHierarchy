@@ -3,7 +3,6 @@
 //
 
 #include "ContractionBuilder.hpp"
-#include <iostream>
 
 Graph* ContractionBuilder::buildGplus() {
 
@@ -134,7 +133,7 @@ void ContractionBuilder::contractGraph() {
             }
         }
     }
-    GplusFirstOut[n] = GplusHead.size();
+
     GplusFirstOut[n] = GplusHead.size();
     Gplus = new Graph(GplusFirstOut, GplusHead, GplusUpwardWeights, GplusDownwardWeights, ET);
 }

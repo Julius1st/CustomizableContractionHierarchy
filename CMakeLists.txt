@@ -15,6 +15,3 @@ add_subdirectory(src/api)
 # Demo executable
 add_executable(cch_demo main.cpp)
 target_link_libraries(cch_demo PRIVATE cch_api)
-
-add_executable(test test.cpp)
-target_link_libraries(test PRIVATE cch_api)

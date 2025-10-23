@@ -5,6 +5,10 @@
 
 Graph::Graph(std::vector<uint32_t> &firstOut, std::vector<uint32_t> &head, std::vector<uint32_t>& upwardWeightsVec, std::vector<uint32_t>& downwardWeightsVec) :
 firstOut(firstOut), head(head), upwardWeights(upwardWeightsVec), downwardWeights(downwardWeightsVec) {
+    if (upwardWeights.size() != head.size())
+        throw std::invalid_argument("Graph constructor: upwardWeights size does not match head size.");
+    if (downwardWeights.size() != head.size())
+        throw std::invalid_argument("Graph constructor: downwardWeights size does not match head size.");
     n = firstOut.size() -1;
     m = head.size();
     initEliminationTree();
