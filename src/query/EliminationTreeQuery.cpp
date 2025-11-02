@@ -12,6 +12,13 @@ EliminationTreeQuery::EliminationTreeQuery(Graph *g) : G(g){
 uint32_t EliminationTreeQuery::query(uint32_t s, uint32_t t) {
     distUp[s] = 0;
     distDown[t] = 0;
+
+    // Initialize distances from precomputed nodes (query speed-up)
+    for (int i = 0; i < G->getPrecomputedNodes().size(); i++) {
+        distUp[G->getPrecomputedNodes()[i]] = G->getPrecomputedDistancesUp(s)[i];
+        distDown[G->getPrecomputedNodes()[i]] = G->getPrecomputedDistancesDown(t)[i];
+    }
+
     while (s != t) {
         if (s < t) {
             ProcessVertexUp(s, Graph::INFINITY);

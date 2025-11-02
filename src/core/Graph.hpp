@@ -27,6 +27,10 @@ public:
     void initEliminationTree();
     uint32_t parentOf(uint32_t node) const;
 
+    const std::vector<uint32_t>& getPrecomputedNodes() const { return precomputedNodes; } // nodes to which distances have been precomputed
+    const std::vector<uint32_t>& getPrecomputedDistancesUp(uint32_t node) const {return precomputedDistancesUp[node];} // distances from 'node' to precomputed Nodes
+    const std::vector<uint32_t>& getPrecomputedDistancesDown(uint32_t node) const {return precomputedDistancesDown[node];} // distances from 'node' to precomputed Nodes
+
 private:
     uint32_t n; // Number of Vertices
     uint32_t m; // Number of Edges
@@ -37,4 +41,9 @@ private:
     // Weights are stored in upwardWeights if head node has higher ID than tail node. downwardWeights the other way around.
     std::vector<uint32_t> upwardWeights;
     std::vector<uint32_t> downwardWeights;
+
+    // For query speed-ups
+    std::vector<uint32_t> precomputedNodes; // Global list of nodes to which distances have been precomputed
+    std::vector<std::vector<uint32_t>> precomputedDistancesUp; // Corresponding distances from all other nodes to each node in precomputedNodes
+    std::vector<std::vector<uint32_t>> precomputedDistancesDown; // Corresponding distances from all other nodes to each node in precomputedNodes
 };
