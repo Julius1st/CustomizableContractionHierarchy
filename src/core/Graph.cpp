@@ -13,7 +13,9 @@ firstOut(firstOut), head(head), upwardWeights(upwardWeightsVec), downwardWeights
     m = head.size();
     initEliminationTree();
 
-    precomputedDistances.resize(n);
+    precomputedNodes.resize(n);
+    precomputedDistancesUp.resize(n);
+    precomputedDistancesDown.resize(n);
 }
 
 Graph::Graph(std::vector<uint32_t> &firstOut, std::vector<uint32_t> &head, std::vector<uint32_t>& upwardWeightsVec, std::vector<uint32_t>& downwardWeightsVec, std::vector<uint32_t>& eliminationTree) :
@@ -25,7 +27,9 @@ Graph::Graph(std::vector<uint32_t> &firstOut, std::vector<uint32_t> &head, std::
     n = firstOut.size() -1;
     m = head.size();
 
-    precomputedDistances.resize(n);
+    precomputedNodes.resize(n);
+    precomputedDistancesUp.resize(n);
+    precomputedDistancesDown.resize(n);
 }
 
 uint32_t Graph::getHead(uint32_t edgeID) const {

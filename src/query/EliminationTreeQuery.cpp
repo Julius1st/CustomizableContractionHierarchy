@@ -14,9 +14,9 @@ uint32_t EliminationTreeQuery::query(uint32_t s, uint32_t t) {
     distDown[t] = 0;
 
     // Initialize distances from precomputed nodes (query speed-up)
-    for (int i = 0; i < G->getPrecomputedNodes().size(); i++) {
-        distUp[G->getPrecomputedNodes()[i]] = G->getPrecomputedDistancesUp(s)[i];
-        distDown[G->getPrecomputedNodes()[i]] = G->getPrecomputedDistancesDown(t)[i];
+    for (int i = 0; i < G->getPrecomputedNodes(s).size(); i++) {
+        distUp[G->getPrecomputedNodes(s)[i]] = G->getPrecomputedDistancesUp(s)[i];
+        distDown[G->getPrecomputedNodes(s)[i]] = G->getPrecomputedDistancesDown(s)[i];
     }
 
     while (s != t) {

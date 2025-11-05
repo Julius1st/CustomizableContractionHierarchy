@@ -27,9 +27,10 @@ public:
     void initEliminationTree();
     uint32_t parentOf(uint32_t node) const;
 
-    const std::vector<uint32_t>& getPrecomputedNodes() const { return precomputedNodes; } // nodes to which distances have been precomputed
-    const std::vector<uint32_t>& getPrecomputedDistancesUp(uint32_t node) const {return precomputedDistancesUp[node];} // distances from 'node' to precomputed Nodes
-    const std::vector<uint32_t>& getPrecomputedDistancesDown(uint32_t node) const {return precomputedDistancesDown[node];} // distances from 'node' to precomputed Nodes
+    // TODO: implement with throwing exceptions
+    const std::vector<uint32_t>& getPrecomputedNodes(uint32_t node) const { return precomputedNodes[node]; } // nodes to which distances have been precomputed from node
+    const std::vector<uint32_t>& getPrecomputedDistancesUp(uint32_t node) const {return precomputedDistancesUp[node];} // distances from 'node' to precomputed Nodes of node
+    const std::vector<uint32_t>& getPrecomputedDistancesDown(uint32_t node) const {return precomputedDistancesDown[node];} // distances from 'node' to precomputed Nodes of node
 
 private:
     uint32_t n; // Number of Vertices
@@ -43,7 +44,7 @@ private:
     std::vector<uint32_t> downwardWeights;
 
     // For query speed-ups
-    std::vector<uint32_t> precomputedNodes; // Global list of nodes to which distances have been precomputed
-    std::vector<std::vector<uint32_t>> precomputedDistancesUp; // Corresponding distances from all other nodes to each node in precomputedNodes
+    std::vector<std::vector<uint32_t>> precomputedNodes; // nodes to which distances have been precomputed
+    std::vector<std::vector<uint32_t>> precomputedDistancesUp; // Corresponding distances from all other nodes to each node in precomputedNodes (precomputedDistancesUp[node][i] = distance from node to precomputedNodes[node][i])
     std::vector<std::vector<uint32_t>> precomputedDistancesDown; // Corresponding distances from all other nodes to each node in precomputedNodes
 };
