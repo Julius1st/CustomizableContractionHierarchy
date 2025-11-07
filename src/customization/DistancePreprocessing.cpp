@@ -17,6 +17,11 @@ void DistancePreprocessing::precomputeDistances() {
     auto headStart = G->beginNeighborhood(0);
 
     for (uint32_t node = G->numVertices(); node-- > 0;) {
+        // For computing Distances to the vertices with the highest IDs in the Graph
+        std::vector<uint32_t> precomputeNodesIDs(precomputedNodes[G->parentOf(node)]);
+        if (G->parentOf(node) < 1000) precomputeNodesIDs.push_back(G->parentOf(node)); // TODO: add precomputation amount as program parameter
+        precomputedNodes[node] = precomputeNodesIDs;
+
         for (auto itv = G->beginNeighborhood(node); itv != G->endNeighborhood(node); itv++) {
             uint32_t neighbor = *itv;
             uint32_t lowerPrecomputationID = 0;
