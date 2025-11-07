@@ -7,7 +7,7 @@
 
 class DistancePreprocessing {
 public:
-    explicit DistancePreprocessing(Graph* graph) : G(graph) {eliminationTree = G->getEliminationTree();}
+    explicit DistancePreprocessing(Graph* graph);
 
     Graph* run();
 

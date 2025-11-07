@@ -4,6 +4,13 @@
 
 #include "DistancePreprocessing.hpp"
 
+DistancePreprocessing::DistancePreprocessing(Graph* graph) : G(graph) {
+    eliminationTree = G->getEliminationTree();
+    precomputedNodes.resize(G->numVertices());
+    precomputedDistancesUp.resize(G->numVertices());
+    precomputedDistancesDown.resize(G->numVertices());
+}
+
 Graph* DistancePreprocessing::run() {
 
     precomputeDistances();
@@ -17,15 +24,29 @@ void DistancePreprocessing::precomputeDistances() {
     auto headStart = G->beginNeighborhood(0);
 
     for (uint32_t node = G->numVertices(); node-- > 0;) {
+        if (G->parentOf(node) == Graph::INFINITY) continue;
+
         // For computing Distances to the vertices with the highest IDs in the Graph
         std::vector<uint32_t> precomputeNodesIDs(precomputedNodes[G->parentOf(node)]);
-        if (G->parentOf(node) < 1000) precomputeNodesIDs.push_back(G->parentOf(node)); // TODO: add precomputation amount as program parameter
+        if (G->parentOf(node) > G->numVertices() - 1000) precomputeNodesIDs.push_back(G->parentOf(node)); // TODO: add precomputation amount as program parameter
         precomputedNodes[node] = precomputeNodesIDs;
+
+        precomputedDistancesUp[node].resize(precomputedNodes[node].size(), Graph::INFINITY);
+        precomputedDistancesDown[node].resize(precomputedNodes[node].size(), Graph::INFINITY);
 
         for (auto itv = G->beginNeighborhood(node); itv != G->endNeighborhood(node); itv++) {
             uint32_t neighbor = *itv;
             uint32_t lowerPrecomputationID = 0;
             uint32_t upperPrecomputationID = 0;
+
+            // Compute the distances to the parent node
+            if (neighbor == G->parentOf(node)) {
+                uint32_t distanceToParentUp = G->getDownwardWeight(std::distance(headStart, itv));
+                uint32_t distanceToParentDown = G->getUpwardWeight(std::distance(headStart, itv));
+
+                precomputedDistancesUp[node].back() = distanceToParentUp;
+                precomputedDistancesDown[node].back() = distanceToParentDown;
+            }
 
             while (lowerPrecomputationID < precomputedNodes[node].size() && upperPrecomputationID < precomputedNodes[neighbor].size()) {
                 if (precomputedNodes[node][lowerPrecomputationID] < precomputedNodes[neighbor][upperPrecomputationID]) lowerPrecomputationID++;
