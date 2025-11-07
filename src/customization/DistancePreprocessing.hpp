@@ -7,13 +7,14 @@
 
 class DistancePreprocessing {
 public:
-    explicit DistancePreprocessing(Graph* graph) : G(graph) {}
+    explicit DistancePreprocessing(Graph* graph) : G(graph) {eliminationTree = G->getEliminationTree();}
 
     Graph* run();
 
 private:
     Graph* G;
     Graph* Gnew;
+    std::vector<uint32_t> eliminationTree;
 
     std::vector<std::vector<uint32_t>> precomputedNodes; // nodes to which distances have been precomputed
     std::vector<std::vector<uint32_t>> precomputedDistancesUp; // Corresponding distances from all other nodes to each node in precomputedNodes (precomputedDistancesUp[node][i] = distance from node to precomputedNodes[node][i])

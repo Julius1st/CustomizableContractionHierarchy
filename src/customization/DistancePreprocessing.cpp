@@ -53,5 +53,37 @@ void DistancePreprocessing::precomputeDistances() {
 }
 
 void DistancePreprocessing::createGraphWithPrecomputedDistances() {
-    // TODO: create new Graph by deleting superfluous edges and setting the precomputed distances
+    std::vector<uint32_t> newFirstOut;
+    std::vector<uint32_t> newHead;
+    std::vector<uint32_t> newUpwardWeights;
+    std::vector<uint32_t> newDownwardWeights;
+
+    newFirstOut.resize(G->numVertices() + 1);
+    newFirstOut[0] = 0;
+
+    auto headStart = G->beginNeighborhood(0);
+
+
+    for (uint32_t node = 0; node < G->numVertices(); node++) {
+        uint32_t precomputedNodesID = 0;
+        uint32_t addedEdges = 0;
+        for (auto it = G->beginNeighborhood(node); it != G->endNeighborhood(node); it++) {
+            uint32_t neighbor = *it;
+
+            // If all precomputed nodes have been skipped or the neighbor is smaller than the current precomputed node, add the edge
+            if (precomputedNodesID == precomputedNodes[node].size() || neighbor < precomputedNodes[node][precomputedNodesID]) {
+                newHead.push_back(neighbor);
+                newUpwardWeights.push_back(G->getUpwardWeight(std::distance(headStart, it)));
+                newDownwardWeights.push_back(G->getDownwardWeight(std::distance(headStart, it)));
+                addedEdges++;
+            }
+            else if (neighbor > precomputedNodes[node][precomputedNodesID]) precomputedNodesID++;
+
+            // If neighbor == precomputedNodes[node][precomputedNodesID], skip adding the edge
+        }
+        newFirstOut[node +1] = newFirstOut[node] + addedEdges;
+    }
+
+    Gnew = new Graph(newFirstOut, newHead, newUpwardWeights, newDownwardWeights, eliminationTree,
+                     precomputedNodes, precomputedDistancesUp, precomputedDistancesDown);
 }

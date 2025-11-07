@@ -13,6 +13,8 @@ public:
 
     Graph(std::vector<uint32_t>& firstOut, std::vector<uint32_t>& head, std::vector<uint32_t>& upwardWeights, std::vector<uint32_t>& downwardWeights);
     Graph(std::vector<uint32_t>& firstOut, std::vector<uint32_t>& head, std::vector<uint32_t>& upwardWeights, std::vector<uint32_t>& downwardWeights, std::vector<uint32_t>& eliminationTree);
+    Graph(std::vector<uint32_t>& firstOut, std::vector<uint32_t>& head, std::vector<uint32_t>& upwardWeights, std::vector<uint32_t>& downwardWeights, std::vector<uint32_t>& eliminationTree,
+          std::vector<std::vector<uint32_t>> &precomputedNodes, std::vector<std::vector<uint32_t>> &precomputedDistancesUp, std::vector<std::vector<uint32_t>> &precomputedDistancesDown);
 
     uint32_t numVertices() const { return n;}
     uint32_t getHead(uint32_t edgeID) const;
@@ -26,6 +28,7 @@ public:
 
     void initEliminationTree();
     uint32_t parentOf(uint32_t node) const;
+    std::vector<uint32_t> getEliminationTree() const { return eliminationTree; }
 
     // TODO: implement with throwing exceptions
     const std::vector<uint32_t>& getPrecomputedNodes(uint32_t node) const { return precomputedNodes[node]; } // nodes to which distances have been precomputed from node
