@@ -7,6 +7,7 @@
 #include "preprocessing/ContractionBuilder.hpp"
 #include "customization/BasicCustomizer.hpp"
 #include "query/EliminationTreeQuery.hpp"
+#include "DistancePreprocessing.hpp"
 #include <vector>
 
 // Facade Class
@@ -18,10 +19,6 @@ public:
     void customize();
     uint32_t query(uint32_t s, uint32_t t);
 
-    // just for testing
-    Graph* getGplus(){ return Gplus; }
-    std::vector<uint32_t> getRank() { return builder->getRank(); }
-
 private:
     Graph* G;
     Graph* Gplus;
@@ -31,4 +28,8 @@ private:
     ContractionBuilder* builder;
     BasicCustomizer* basicCustomizer;
     EliminationTreeQuery* queryEngine;
+
+    // For query speed-up:
+    DistancePreprocessing* distancePreprocessing;
+    Graph* GwithPrecomputedDistances;
 };

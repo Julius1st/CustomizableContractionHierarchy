@@ -14,7 +14,15 @@ void CCH::preprocess() {
 
 void CCH::customize() {
     basicCustomizer->run();
-    queryEngine = new EliminationTreeQuery(Gplus);
+    // Removed to use the distance-preprocessed graph for queries:
+    // queryEngine = new EliminationTreeQuery(Gplus);
+
+    // TODO: create option to switch between normal and distance-preprocessed queries with program parameter
+
+    // For query speed-up:
+    distancePreprocessing = new DistancePreprocessing(Gplus);
+    GwithPrecomputedDistances = distancePreprocessing->run();
+    queryEngine = new EliminationTreeQuery(GwithPrecomputedDistances);
 }
 
 uint32_t CCH::query(uint32_t s, uint32_t t) {
