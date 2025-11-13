@@ -13,23 +13,42 @@ uint32_t EliminationTreeQuery::query(uint32_t s, uint32_t t) {
     distUp[s] = 0;
     distDown[t] = 0;
 
+    uint32_t d = Graph::INFINITY;
+
     // Initialize distances from precomputed nodes (query speed-up)
-    for (int i = 0; i < G->getPrecomputedNodes(s).size(); i++) {
-        distUp[G->getPrecomputedNodes(s)[i]] = G->getPrecomputedDistancesUp(s)[i];
-        distDown[G->getPrecomputedNodes(s)[i]] = G->getPrecomputedDistancesDown(s)[i];
+    auto begin = std::chrono::steady_clock::now();
+    uint32_t sIndex = 0;
+    uint32_t tIndex = 0;
+    while (sIndex < G->getPrecomputedNodes(s).size() && tIndex < G->getPrecomputedNodes(t).size()) {
+        if (G->getPrecomputedNodes(s)[sIndex] < G->getPrecomputedNodes(t)[tIndex]) {
+            distUp[G->getPrecomputedNodes(s)[sIndex]] = G->getPrecomputedDistancesUp(s)[sIndex];
+            sIndex++;
+        } else if (G->getPrecomputedNodes(s)[sIndex] > G->getPrecomputedNodes(t)[tIndex]) {
+            distDown[G->getPrecomputedNodes(t)[tIndex]] = G->getPrecomputedDistancesDown(t)[tIndex];
+            tIndex++;
+        } else {
+            distUp[G->getPrecomputedNodes(s)[sIndex]] = G->getPrecomputedDistancesUp(s)[sIndex];
+            distDown[G->getPrecomputedNodes(t)[tIndex]] = G->getPrecomputedDistancesDown(t)[tIndex];
+            d = std::min(d, G->getPrecomputedDistancesUp(s)[sIndex] + G->getPrecomputedDistancesDown(t)[tIndex]);
+            sIndex++;
+            tIndex++;
+        }
     }
+    auto end = std::chrono::steady_clock::now();
+    initTime += std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count();
+    initializedFields += sIndex + tIndex;
+
 
     while (s != t) {
         if (s < t) {
-            ProcessVertexUp(s, Graph::INFINITY);
+            ProcessVertexUp(s, d);
             s = G->parentOf(s);
         } else {
-            ProcessVertexDown(t, Graph::INFINITY);
+            ProcessVertexDown(t, d);
             t = G->parentOf(t);
         }
     }
 
-    uint32_t d = Graph::INFINITY;
     uint32_t u = s;
 
     while (u != Graph::INFINITY) {
