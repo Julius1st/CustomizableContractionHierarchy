@@ -17,6 +17,7 @@ public:
           std::vector<std::vector<uint32_t>> &precomputedNodes, std::vector<std::vector<uint32_t>> &precomputedDistancesUp, std::vector<std::vector<uint32_t>> &precomputedDistancesDown);
 
     uint32_t numVertices() const { return n;}
+    uint32_t numEdges() const { return m;}
     uint32_t getHead(uint32_t edgeID) const;
     uint32_t getUpwardWeight(uint32_t edgeID) const; // the edgeID corresponds to the index the edge Head has in the head vector.
     uint32_t getDownwardWeight(uint32_t  edgeID) const; // the edgeID corresponds to the index the edge Head has in the head vector.

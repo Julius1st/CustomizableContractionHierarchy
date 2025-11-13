@@ -18,6 +18,9 @@ public:
     void preprocess();
     void customize();
     uint32_t query(uint32_t s, uint32_t t);
+    uint32_t queryWithDistancePreprocessing(uint32_t s, uint32_t t);
+    int getInitTime() const { return queryEngine->getInitTime(); }
+    uint32_t getInitializedFields() const { return queryEngine->getInitializedFields(); }
 
 private:
     Graph* G;
@@ -28,6 +31,7 @@ private:
     ContractionBuilder* builder;
     BasicCustomizer* basicCustomizer;
     EliminationTreeQuery* queryEngine;
+    EliminationTreeQuery* distancePreprocessedQueryEngine;
 
     // For query speed-up:
     DistancePreprocessing* distancePreprocessing;

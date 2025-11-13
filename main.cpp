@@ -197,24 +197,41 @@ int main(int argc, char *argv[]) {
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
         cout << "done, time in milliseconds: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << endl;
 
-        cout << "Customizing Graph ... " << flush;
+        cout << "Customizing Graph ... " << std::endl << flush;
         begin = std::chrono::steady_clock::now();
         cch->customize();
         end = std::chrono::steady_clock::now();
         cout << "done, time in milliseconds: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << endl;
 
         cout << "Querying distances ... " << endl << flush;
-        begin = std::chrono::steady_clock::now();
+        int norm_time = 0;
+        int preproc_time = 0;
 
-        // TODO Setup query nodes s and t
-        uint32_t s;
-        uint32_t t;
-        uint32_t dijkstra_distance;
-        uint32_t cch_distance;
+        // 1000 random queries from which the average query runtime is computed
+        for (uint32_t i = 0; i < 1000; ++i) {
+            uint32_t s = rand() % node_count;
+            uint32_t t = rand() % node_count;
 
-        cout << "Dijkstra distance: " << dijkstra_distance << " CCH distance: " << cch_distance << endl;
-        end = std::chrono::steady_clock::now();
-        cout << "done, time in milliseconds: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << endl;
+            begin = std::chrono::steady_clock::now();
+            uint32_t cch_distance = cch->query(s, t);
+            end = std::chrono::steady_clock::now();
+            norm_time += std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count();
+
+            begin = std::chrono::steady_clock::now();
+            uint32_t cch_precomputed_distance = cch->queryWithDistancePreprocessing(s, t);
+            end = std::chrono::steady_clock::now();
+            preproc_time += std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count();
+
+            if(cch_distance != cch_precomputed_distance) {
+                throw runtime_error("Distances from CCH query and distance-preprocessed CCH query do not match.");
+            }
+
+        }
+
+        cout << "done, time in nanoseconds (normal query): " << norm_time << " average per query: " << norm_time /1000 << endl;
+        cout << "done, time in nanoseconds (distance-preprocessed query): " << preproc_time << " average per query: " << preproc_time /1000 << endl;
+        std::cout << "Query init time in nanoseconds (avg): " << cch->getInitTime() /1000 << std::endl;
+        std::cout << "Initialized fields (avg): " << cch->getInitializedFields() /1000 << std::endl;
 
     }catch(exception&err){
         cerr << "Stopped on exception : " << err.what() << endl;

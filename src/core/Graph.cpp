@@ -12,6 +12,9 @@ firstOut(firstOut), head(head), upwardWeights(upwardWeightsVec), downwardWeights
     n = firstOut.size() -1;
     m = head.size();
     initEliminationTree();
+    precomputedNodes.resize(n);
+    precomputedDistancesUp.resize(n);
+    precomputedDistancesDown.resize(n);
 }
 
 Graph::Graph(std::vector<uint32_t> &firstOut, std::vector<uint32_t> &head, std::vector<uint32_t>& upwardWeightsVec, std::vector<uint32_t>& downwardWeightsVec, std::vector<uint32_t>& eliminationTree) :
@@ -22,6 +25,9 @@ Graph::Graph(std::vector<uint32_t> &firstOut, std::vector<uint32_t> &head, std::
         throw std::invalid_argument("Graph constructor: downwardWeights size does not match head size.");
     n = firstOut.size() -1;
     m = head.size();
+    precomputedNodes.resize(n);
+    precomputedDistancesUp.resize(n);
+    precomputedDistancesDown.resize(n);
 }
 
 Graph::Graph(std::vector<uint32_t> &firstOut, std::vector<uint32_t> &head, std::vector<uint32_t>& upwardWeightsVec, std::vector<uint32_t>& downwardWeightsVec, std::vector<uint32_t>& eliminationTree,
