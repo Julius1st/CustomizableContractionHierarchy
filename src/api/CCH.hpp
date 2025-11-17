@@ -19,8 +19,11 @@ public:
     void customize();
     uint32_t query(uint32_t s, uint32_t t);
     uint32_t queryWithDistancePreprocessing(uint32_t s, uint32_t t);
-    int getInitTime() const { return queryEngine->getInitTime(); }
-    uint32_t getInitializedFields() const { return queryEngine->getInitializedFields(); }
+    int getInitTime() const { return distancePreprocessedQueryEngine->getInitTime(); }
+    uint32_t getInitializedFields() const { return distancePreprocessedQueryEngine->getInitializedFields(); }
+
+    //For testing:
+    void printEliminationTreeInformation();
 
 private:
     Graph* G;
