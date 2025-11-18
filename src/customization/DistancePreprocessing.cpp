@@ -4,6 +4,7 @@
 
 #include <chrono>
 #include <iostream>
+#include <stdexcept>
 #include "DistancePreprocessing.hpp"
 
 DistancePreprocessing::DistancePreprocessing(Graph* graph) : G(graph) {
@@ -36,10 +37,8 @@ void DistancePreprocessing::precomputeDistances() {
     for (uint32_t node = G->numVertices(); node-- > 0;) {
         if (G->parentOf(node) == Graph::INFINITY) continue;
 
-        // For computing Distances to the vertices with the highest IDs in the Graph
-        std::vector<uint32_t> precomputeNodesIDs(precomputedNodes[G->parentOf(node)]);
-        if (G->parentOf(node) > G->numVertices() - 100) precomputeNodesIDs.push_back(G->parentOf(node)); // TODO: add precomputation amount as program parameter
-        precomputedNodes[node] = precomputeNodesIDs;
+        // TODO: Different options for selecting nodes for distance precomputation via program parameter
+        selectNodesWithHighestID(node, 100);
 
         precomputedDistancesUp[node].resize(precomputedNodes[node].size(), Graph::INFINITY);
         precomputedDistancesDown[node].resize(precomputedNodes[node].size(), Graph::INFINITY);
@@ -117,4 +116,35 @@ void DistancePreprocessing::createGraphWithPrecomputedDistances() {
 
     Gnew = new Graph(newFirstOut, newHead, newUpwardWeights, newDownwardWeights, eliminationTree,
                      precomputedNodes, precomputedDistancesUp, precomputedDistancesDown);
+}
+
+void DistancePreprocessing::selectNodesWithHighestID(uint32_t currentVertex, uint32_t numberOfNodesToSelect) {
+    if (numberOfNodesToSelect > G->numVertices()) {
+        throw std::invalid_argument("selectNodesWithHighestID called with numberOfNodesToSelect larger than number of vertices in graph.");
+    }
+    if (currentVertex == Graph::INFINITY) {
+        throw std::invalid_argument("selectNodesWithHighestID called with INFINITY as currentVertex.");
+    }
+    if (G->parentOf(currentVertex) == Graph::INFINITY) {
+        precomputedNodes[currentVertex] = std::vector<uint32_t>();
+        return;
+    }
+    std::vector<uint32_t> precomputeNodesIDs(precomputedNodes[G->parentOf(currentVertex)]);
+    if (G->parentOf(currentVertex) > G->numVertices() - numberOfNodesToSelect) precomputeNodesIDs.push_back(G->parentOf(currentVertex));
+    precomputedNodes[currentVertex] = precomputeNodesIDs;
+}
+
+void DistancePreprocessing::selectNodesWithMaxDistanceToRoot(uint32_t currentVertex, uint32_t maxDistance) {
+    if (currentVertex == Graph::INFINITY) {
+        throw std::invalid_argument("selectNodesWithMaxDistanceToRoot called with INFINITY as currentVertex.");
+    }
+    if (G->parentOf(currentVertex) == Graph::INFINITY) {
+        precomputedNodes[currentVertex] = std::vector<uint32_t>();
+        distanceToRoot[currentVertex] = 0;
+        return;
+    }
+    distanceToRoot[currentVertex] = distanceToRoot[G->parentOf(currentVertex)] +1;
+    std::vector<uint32_t> precomputeNodesIDs(precomputedNodes[G->parentOf(currentVertex)]);
+    if (distanceToRoot[currentVertex] <= maxDistance) precomputeNodesIDs.push_back(currentVertex);
+    precomputedNodes[currentVertex] = precomputeNodesIDs;
 }
