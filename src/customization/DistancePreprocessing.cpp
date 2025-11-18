@@ -27,6 +27,7 @@ Graph* DistancePreprocessing::run() {
 
     std::cout << "This many Edges have been deleted in Distance Preprocessing: " << G->numEdges() - Gnew->numEdges() << std::endl;
 
+    // Gnew->printGraphInfo();
     return Gnew;
 }
 
@@ -35,7 +36,6 @@ void DistancePreprocessing::precomputeDistances() {
     auto headStart = G->beginNeighborhood(0);
 
     for (uint32_t node = G->numVertices(); node-- > 0;) {
-        if (G->parentOf(node) == Graph::INFINITY) continue;
 
         // TODO: Different options for selecting nodes for distance precomputation via program parameter
         selectNodesWithHighestID(node, 100);
@@ -43,27 +43,49 @@ void DistancePreprocessing::precomputeDistances() {
         precomputedDistancesUp[node].resize(precomputedNodes[node].size(), Graph::INFINITY);
         precomputedDistancesDown[node].resize(precomputedNodes[node].size(), Graph::INFINITY);
 
+        if (precomputedNodes[node].empty()) continue;
+        if (G->beginNeighborhood(node) == G->endNeighborhood(node)) continue; // No neighbors
+
+        // Initialize distances to precomputed nodes that are direct neighbors
+        uint32_t neighborPrecomputationID = precomputedNodes[node].size() -1; // Index for iterating over precomputed nodes to check if neighbor is also a precomputed node and if so initialize it
+        uint32_t neighborID = 0;
+        while (neighborID < std::distance(G->beginNeighborhood(node), G->endNeighborhood(node))) {
+            if (neighborPrecomputationID >= precomputedNodes[node].size()) break; // Underflow
+
+            uint32_t neighbor = *(G->beginNeighborhood(node) + neighborID);
+            if (precomputedNodes[node][neighborPrecomputationID] == neighbor) {
+                uint32_t edgeID = std::distance(headStart, G->beginNeighborhood(node) + neighborID);
+                uint32_t distanceViaNeighborUp = G->getUpwardWeight(edgeID);
+                uint32_t distanceViaNeighborDown = G->getDownwardWeight(edgeID);
+
+                precomputedDistancesUp[node][neighborPrecomputationID] = distanceViaNeighborUp;
+                precomputedDistancesDown[node][neighborPrecomputationID] = distanceViaNeighborDown;
+
+                neighborPrecomputationID--;
+            }
+            else if (precomputedNodes[node][neighborPrecomputationID] < neighbor) {
+                neighborPrecomputationID--;
+            }
+            else {
+                neighborID++;
+            }
+        }
+
         for (auto itv = G->beginNeighborhood(node); itv != G->endNeighborhood(node); itv++) {
             uint32_t neighbor = *itv;
             uint32_t lowerPrecomputationID = 0;
             uint32_t upperPrecomputationID = 0;
 
-            // Compute the distances to the parent node
-            if (neighbor == G->parentOf(node)) {
-                uint32_t distanceToParentUp = G->getDownwardWeight(std::distance(headStart, itv));
-                uint32_t distanceToParentDown = G->getUpwardWeight(std::distance(headStart, itv));
-
-                precomputedDistancesUp[node].back() = distanceToParentUp;
-                precomputedDistancesDown[node].back() = distanceToParentDown;
-            }
-
             while (lowerPrecomputationID < precomputedNodes[node].size() && upperPrecomputationID < precomputedNodes[neighbor].size()) {
+
                 if (precomputedNodes[node][lowerPrecomputationID] < precomputedNodes[neighbor][upperPrecomputationID]) lowerPrecomputationID++;
+
                 else if (precomputedNodes[node][lowerPrecomputationID] > precomputedNodes[neighbor][upperPrecomputationID]) upperPrecomputationID++; // This case should never happen
+
                 else {
                     // Match found
-                    uint32_t distanceViaNeighborUp = G->getDownwardWeight(std::distance(headStart, itv)) + precomputedDistancesUp[neighbor][upperPrecomputationID];
-                    uint32_t distanceViaNeighborDown = G->getUpwardWeight(std::distance(headStart, itv)) + precomputedDistancesDown[neighbor][upperPrecomputationID];
+                    uint32_t distanceViaNeighborUp = G->getUpwardWeight(std::distance(headStart, itv)) + precomputedDistancesUp[neighbor][upperPrecomputationID];
+                    uint32_t distanceViaNeighborDown = G->getDownwardWeight(std::distance(headStart, itv)) + precomputedDistancesDown[neighbor][upperPrecomputationID];
 
                     // Update distances if smaller via neighbor
                     if (distanceViaNeighborUp < precomputedDistancesUp[node][lowerPrecomputationID]) {

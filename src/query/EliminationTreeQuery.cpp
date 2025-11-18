@@ -19,17 +19,24 @@ uint32_t EliminationTreeQuery::query(uint32_t s, uint32_t t) {
     auto begin = std::chrono::steady_clock::now();
     uint32_t sIndex = 0;
     uint32_t tIndex = 0;
-    while (sIndex < G->getPrecomputedNodes(s).size() && tIndex < G->getPrecomputedNodes(t).size()) {
-        if (G->getPrecomputedNodes(s)[sIndex] < G->getPrecomputedNodes(t)[tIndex]) {
+    while (sIndex < G->getPrecomputedNodes(s).size() || tIndex < G->getPrecomputedNodes(t).size()) {
+        if (sIndex < G->getPrecomputedNodes(s).size() && (tIndex >= G->getPrecomputedNodes(t).size() ||
+            G->getPrecomputedNodes(s)[sIndex] < G->getPrecomputedNodes(t)[tIndex])) {
+
             distUp[G->getPrecomputedNodes(s)[sIndex]] = G->getPrecomputedDistancesUp(s)[sIndex];
             sIndex++;
-        } else if (G->getPrecomputedNodes(s)[sIndex] > G->getPrecomputedNodes(t)[tIndex]) {
+
+        } else if (tIndex < G->getPrecomputedNodes(t).size() && (sIndex >= G->getPrecomputedNodes(s).size() ||
+                   G->getPrecomputedNodes(t)[tIndex] < G->getPrecomputedNodes(s)[sIndex])) {
+
             distDown[G->getPrecomputedNodes(t)[tIndex]] = G->getPrecomputedDistancesDown(t)[tIndex];
             tIndex++;
+
         } else {
-            distUp[G->getPrecomputedNodes(s)[sIndex]] = G->getPrecomputedDistancesUp(s)[sIndex];
-            distDown[G->getPrecomputedNodes(t)[tIndex]] = G->getPrecomputedDistancesDown(t)[tIndex];
-            d = std::min(d, G->getPrecomputedDistancesUp(s)[sIndex] + G->getPrecomputedDistancesDown(t)[tIndex]);
+            // Both are equal
+            uint32_t node = G->getPrecomputedNodes(s)[sIndex];
+            distUp[node] = G->getPrecomputedDistancesUp(s)[sIndex];
+            distDown[node] = G->getPrecomputedDistancesDown(t)[tIndex];
             sIndex++;
             tIndex++;
         }
@@ -38,7 +45,7 @@ uint32_t EliminationTreeQuery::query(uint32_t s, uint32_t t) {
     initTime += std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count();
     initializedFields += sIndex + tIndex;
 
-
+    // Original Algorithm
     while (s != t) {
         if (s < t) {
             ProcessVertexUp(s, d);
