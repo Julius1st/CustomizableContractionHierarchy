@@ -23,7 +23,8 @@ public:
     uint32_t getInitializedFields() const { return distancePreprocessedQueryEngine->getInitializedFields(); }
 
     //For testing:
-    void printEliminationTreeInformation();
+    void printEliminationTreeInformationOfGplus();
+    void printEliminationTreeInformationOfNewGraph();
 
 private:
     Graph* G;
