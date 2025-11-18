@@ -86,3 +86,66 @@ uint32_t Graph::parentOf(uint32_t node) const {
     if (node >= n) throw std::out_of_range("Tried to get parent of node " + std::to_string(node) + " but this ID is out of bounds.");
     return eliminationTree[node];
 }
+
+const std::vector<uint32_t>& Graph::getPrecomputedNodes(uint32_t node) const {
+    if (node >= n) throw std::out_of_range("Tried to get precomputed nodes of node " + std::to_string(node) + " but this ID is out of bounds.");
+    return precomputedNodes[node];
+}
+
+const std::vector<uint32_t>& Graph::getPrecomputedDistancesUp(uint32_t node) const {
+    if (node >= n) throw std::out_of_range("Tried to get precomputed distances up of node " + std::to_string(node) + " but this ID is out of bounds.");
+    return precomputedDistancesUp[node];
+}
+const std::vector<uint32_t>& Graph::getPrecomputedDistancesDown(uint32_t node) const {
+    if (node >= n) throw std::out_of_range("Tried to get precomputed distances down of node " + std::to_string(node) + " but this ID is out of bounds.");
+    return precomputedDistancesDown[node];
+}
+
+// Testing functionality:
+void Graph::printGraphInfo() const{
+    std::cout << "Graph Info" << std::endl;
+    std::cout << "FirstOut: ";
+    for (const auto& fo : firstOut) {
+        std::cout << fo << " ";
+    }
+    std::cout << std::endl;
+    std::cout << "Head: ";
+    for (const auto& h : head) {
+        std::cout << h << " ";
+    }
+    std::cout << std::endl;
+    std::cout << "Upward Weights: ";
+    for (const auto& uw : upwardWeights) {
+        std::cout << uw << " ";
+    }
+    std::cout << std::endl;
+    std::cout << "Downward Weights: ";
+    for (const auto& dw : downwardWeights) {
+        std::cout << dw << " ";
+    }
+    std::cout << std::endl;
+    std::cout << "Precomputed Nodes: " << std::endl;
+    for (size_t i = 0; i < precomputedNodes.size(); i++) {
+        std::cout << "Node " << i << ": ";
+        for (const auto& pn : precomputedNodes[i]) {
+            std::cout << pn << " ";
+        }
+        std::cout << std::endl;
+    }
+    std::cout << "Precomputed Distances Up: " << std::endl;
+    for (size_t i = 0; i < precomputedDistancesUp.size(); i++) {
+        std::cout << "Node " << i << ": ";
+        for (const auto& pdu : precomputedDistancesUp[i]) {
+            std::cout << pdu << " ";
+        }
+        std::cout << std::endl;
+    }
+    std::cout << "Precomputed Distances Down: " << std::endl;
+    for (size_t i = 0; i < precomputedDistancesDown.size(); i++) {
+        std::cout << "Node " << i << ": ";
+        for (const auto& pdd : precomputedDistancesDown[i]) {
+            std::cout << pdd << " ";
+        }
+        std::cout << std::endl;
+    }
+}

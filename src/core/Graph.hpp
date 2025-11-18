@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <algorithm>
 #include <cstdint>
+#include <iostream>
 
 class Graph {
 public:
@@ -31,10 +32,12 @@ public:
     uint32_t parentOf(uint32_t node) const;
     std::vector<uint32_t> getEliminationTree() const { return eliminationTree; }
 
-    // TODO: implement with throwing exceptions
-    const std::vector<uint32_t>& getPrecomputedNodes(uint32_t node) const { return precomputedNodes[node]; } // nodes to which distances have been precomputed from node
-    const std::vector<uint32_t>& getPrecomputedDistancesUp(uint32_t node) const {return precomputedDistancesUp[node];} // distances from 'node' to precomputed Nodes of node
-    const std::vector<uint32_t>& getPrecomputedDistancesDown(uint32_t node) const {return precomputedDistancesDown[node];} // distances from 'node' to precomputed Nodes of node
+    const std::vector<uint32_t>& getPrecomputedNodes(uint32_t node) const; // nodes to which distances have been precomputed from node
+    const std::vector<uint32_t>& getPrecomputedDistancesUp(uint32_t node) const; // distances from 'node' to precomputed Nodes of node
+    const std::vector<uint32_t>& getPrecomputedDistancesDown(uint32_t node) const; // distances from 'node' to precomputed Nodes of node
+
+    // For testing
+    void printGraphInfo() const;
 
 private:
     uint32_t n; // Number of Vertices
