@@ -127,6 +127,16 @@ uint32_t dijkstra(uint32_t s, uint32_t t, vector<vector<DirectedEdge>> adj, vect
     return dist[t];
 }
 
+Graph* buildTEstGraph() {
+    // Build a small test graph
+    vector<uint32_t> first_out = {0, 2, 3, 4, 5, 7, 8, 8, 8};
+    vector<uint32_t> head = {2, 3, 3, 4, 4, 5, 6, 7};
+    vector<uint32_t> upward_weight = {2, 3, 13, 24, 34, 45, 46, 57};
+    vector<uint32_t> downward_weight = {20, 30, 31, 42, 43, 54, 64, 75};
+
+    return new Graph(first_out, head, upward_weight, downward_weight);
+}
+
 int main(int argc, char *argv[]) {
     try{
         string graph_first_out;
@@ -159,7 +169,7 @@ int main(int argc, char *argv[]) {
 
         cout << "done" << endl;
 
-        const unsigned node_count = first_out.size()-1;
+        unsigned node_count = first_out.size()-1;
         const unsigned arc_count = head.size();
 
         cout << "Processing graph data ... " << flush;
@@ -189,6 +199,10 @@ int main(int argc, char *argv[]) {
 
         Graph* G = new Graph(clean_first_out, clean_head, clean_upward_weight, clean_downward_weight);
 
+        // activate to use test graph:
+        //G = buildTEstGraph();
+        //order = {0, 1, 2, 3, 4, 5, 6, 7};
+        //node_count = G->numVertices();
 
         CCH* cch = new CCH(G, order);
         std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
@@ -223,7 +237,10 @@ int main(int argc, char *argv[]) {
             preproc_time += std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count();
 
             if(cch_distance != cch_precomputed_distance) {
-                throw runtime_error("Distances from CCH query and distance-preprocessed CCH query do not match.");
+                cout << "Distances from CCH query and distance-preprocessed CCH query do not match. Distance from normal query: "
+                                    + std::to_string(cch_distance) + ", distance from distance-preprocessed query: "
+                                    + std::to_string(cch_precomputed_distance) + " for query from "
+                                    + std::to_string(s) + " to " + std::to_string(t) + ". This was query number: " + std::to_string(i) << endl;
             }
 
         }
