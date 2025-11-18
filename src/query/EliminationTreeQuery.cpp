@@ -42,7 +42,7 @@ uint32_t EliminationTreeQuery::query(uint32_t s, uint32_t t) {
         }
     }
     auto end = std::chrono::steady_clock::now();
-    initTime += std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count();
+    initTime += std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
     initializedFields += sIndex + tIndex;
 
     // Original Algorithm

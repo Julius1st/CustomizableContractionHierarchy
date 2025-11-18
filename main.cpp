@@ -229,12 +229,12 @@ int main(int argc, char *argv[]) {
             begin = std::chrono::steady_clock::now();
             uint32_t cch_distance = cch->query(s, t);
             end = std::chrono::steady_clock::now();
-            norm_time += std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count();
+            norm_time += std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
 
             begin = std::chrono::steady_clock::now();
             uint32_t cch_precomputed_distance = cch->queryWithDistancePreprocessing(s, t);
             end = std::chrono::steady_clock::now();
-            preproc_time += std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count();
+            preproc_time += std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
 
             if(cch_distance != cch_precomputed_distance) {
                 cout << "Distances from CCH query and distance-preprocessed CCH query do not match. Distance from normal query: "
@@ -245,9 +245,9 @@ int main(int argc, char *argv[]) {
 
         }
 
-        cout << "done, time in nanoseconds (normal query): " << norm_time << " average per query: " << norm_time /1000 << endl;
-        cout << "done, time in nanoseconds (distance-preprocessed query): " << preproc_time << " average per query: " << preproc_time /1000 << endl;
-        std::cout << "Query init time in nanoseconds (avg): " << cch->getInitTime() /1000 << std::endl;
+        cout << "done, time in microseconds (normal query): " << norm_time << " average per query: " << norm_time /1000 << endl;
+        cout << "done, time in microseconds (distance-preprocessed query): " << preproc_time << " average per query: " << preproc_time /1000 << endl;
+        std::cout << "Query init time in microseconds (avg): " << cch->getInitTime() /1000 << std::endl;
         std::cout << "Initialized fields (avg): " << cch->getInitializedFields() /1000 << std::endl;
 
     }catch(exception&err){
