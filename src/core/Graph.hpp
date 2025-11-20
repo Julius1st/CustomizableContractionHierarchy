@@ -10,7 +10,7 @@
 
 class Graph {
 public:
-    inline static const uint32_t INFINITY = 0xFFFFFFFF / 2 - 1;
+    inline static const uint32_t INFINITY_VALUE = (0xFFFFFFFF / 2 - 1);
 
     Graph(std::vector<uint32_t>& firstOut, std::vector<uint32_t>& head, std::vector<uint32_t>& upwardWeights, std::vector<uint32_t>& downwardWeights);
     Graph(std::vector<uint32_t>& firstOut, std::vector<uint32_t>& head, std::vector<uint32_t>& upwardWeights, std::vector<uint32_t>& downwardWeights, std::vector<uint32_t>& eliminationTree);
@@ -39,7 +39,7 @@ public:
     // For testing
     void printGraphInfo() const;
 
-private:
+
     uint32_t n; // Number of Vertices
     uint32_t m; // Number of Edges
     std::vector<uint32_t> firstOut;
@@ -54,4 +54,7 @@ private:
     std::vector<std::vector<uint32_t>> precomputedNodes; // nodes to which distances have been precomputed
     std::vector<std::vector<uint32_t>> precomputedDistancesUp; // Corresponding distances from all other nodes to each node in precomputedNodes (precomputedDistancesUp[node][i] = distance from node to precomputedNodes[node][i])
     std::vector<std::vector<uint32_t>> precomputedDistancesDown; // Corresponding distances from all other nodes to each node in precomputedNodes
+
+private:
+
 };

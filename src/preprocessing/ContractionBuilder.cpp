@@ -60,7 +60,7 @@ void ContractionBuilder::permuteNodeIDs() {
 
 void ContractionBuilder::contractGraph() {
     uint32_t n = G->numVertices();
-    std::vector<uint32_t> ET(n, Graph::INFINITY);
+    std::vector<uint32_t> ET(n, Graph::INFINITY_VALUE);
     std::vector<std::vector<uint32_t>> weightlessAdj(n);
 
     // build adjacency list only containing heads for contraction
@@ -103,8 +103,8 @@ void ContractionBuilder::contractGraph() {
                 // remaining edges only in weightlessAdj
                 uint32_t h_weightless = weightlessAdj[u][weightLessIndex];
                 GplusHead.push_back(h_weightless);
-                GplusUpwardWeights.push_back(Graph::INFINITY);
-                GplusDownwardWeights.push_back(Graph::INFINITY);
+                GplusUpwardWeights.push_back(Graph::INFINITY_VALUE);
+                GplusDownwardWeights.push_back(Graph::INFINITY_VALUE);
                 currentIndex++;
                 weightLessIndex++;
                 continue;
@@ -124,8 +124,8 @@ void ContractionBuilder::contractGraph() {
             } else if (h_weightless < h_weighted) {
                 // edge only in weightless, add to Gplus with infinite weights
                 GplusHead.push_back(h_weightless);
-                GplusUpwardWeights.push_back(Graph::INFINITY);
-                GplusDownwardWeights.push_back(Graph::INFINITY);
+                GplusUpwardWeights.push_back(Graph::INFINITY_VALUE);
+                GplusDownwardWeights.push_back(Graph::INFINITY_VALUE);
                 currentIndex++;
                 weightLessIndex++;
             } else {

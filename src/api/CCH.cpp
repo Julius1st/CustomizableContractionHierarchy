@@ -41,13 +41,13 @@ void CCH::printEliminationTreeInformationOfGplus() {
     std::vector<uint32_t> numChildren(Gplus->numVertices(), 0);
     for (uint32_t i = 0; i < Gplus->numVertices(); i++) {
         uint32_t parent = Gplus->parentOf(i);
-        if (parent != Graph::INFINITY) {
+        if (parent != Graph::INFINITY_VALUE) {
             numChildren[parent]++;
         }
     }
     std::vector<uint32_t> distanceToRoot(Gplus->numVertices(), 0);
     for(uint32_t i = Gplus->numVertices(); i-- >0; ) {
-        if (Gplus->parentOf(i) != Graph::INFINITY) {
+        if (Gplus->parentOf(i) != Graph::INFINITY_VALUE) {
             distanceToRoot[i] = distanceToRoot[Gplus->parentOf(i)] + 1;
         }
     }
@@ -63,10 +63,10 @@ void CCH::printEliminationTreeInformationOfGplus() {
     std::vector<uint32_t> componentSizes(Gplus->numVertices(), 1);
     for (uint32_t i = 0; i < Gplus->numVertices(); i++) {
         uint32_t parent = Gplus->parentOf(i);
-        if (parent != Graph::INFINITY) {
+        if (parent != Graph::INFINITY_VALUE) {
             componentSizes[parent] += componentSizes[i];
         }
-        if (parent == Graph::INFINITY) continue;
+        if (parent == Graph::INFINITY_VALUE) continue;
         if (distanceToRoot[i] < 150 && distanceToRoot[i] > 70 && numChildren[parent] >= 2 && componentSizes[i] > 1000000) {
             std::cout << "Dist: " << distanceToRoot[i] << " - Component size of node " << i << " with parent " << parent << " is " << componentSizes[i] << std::endl;
         }
@@ -77,7 +77,7 @@ void CCH::printEliminationTreeInformationOfNewGraph() {
     std::vector<uint32_t> distanceToRoot(GwithPrecomputedDistances->numVertices(), 0);
     std::vector<bool> hasChild(GwithPrecomputedDistances->numVertices(), false);
     for(uint32_t i = GwithPrecomputedDistances->numVertices(); i-- >0; ) {
-        if (GwithPrecomputedDistances->parentOf(i) != Graph::INFINITY) {
+        if (GwithPrecomputedDistances->parentOf(i) != Graph::INFINITY_VALUE) {
             distanceToRoot[i] = distanceToRoot[GwithPrecomputedDistances->parentOf(i)] + 1;
             hasChild[GwithPrecomputedDistances->parentOf(i)] = true;
         }

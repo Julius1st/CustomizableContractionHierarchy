@@ -79,7 +79,7 @@ std::vector<uint32_t>::const_iterator Graph::endNeighborhood(uint32_t u) const {
 }
 
 void Graph::initEliminationTree() {
-    eliminationTree.assign(n, INFINITY);
+    eliminationTree.assign(n, INFINITY_VALUE);
 }
 
 uint32_t Graph::parentOf(uint32_t node) const {
