@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include <chrono>
 #include <queue>
+#include <random>
 #include "CCH.hpp"
 #include "VectorIO.h"
 
@@ -221,10 +222,13 @@ int main(int argc, char *argv[]) {
         int norm_time = 0;
         int preproc_time = 0;
 
+        std::mt19937 mt{};
+        int upperLimit = node_count -1;
+        std::uniform_int_distribution distribution{ 0, upperLimit };
         // 1000 random queries from which the average query runtime is computed
         for (uint32_t i = 0; i < 1000; ++i) {
-            uint32_t s = rand() % node_count;
-            uint32_t t = rand() % node_count;
+            uint32_t s = distribution(mt);
+            uint32_t t = distribution(mt);
 
             begin = std::chrono::steady_clock::now();
             uint32_t cch_distance = cch->query(s, t);
