@@ -25,6 +25,7 @@ private:
 
     void ProcessVertexUp(uint32_t u, uint32_t d);
     void ProcessVertexDown(uint32_t u, uint32_t d);
+    uint32_t initializeDistances(uint32_t s, uint32_t t);
 
     int initTime = 0;
     uint32_t initializedFields = 0;

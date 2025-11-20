@@ -41,7 +41,7 @@ void DistancePreprocessing::precomputeDistances() {
 
         // TODO: Different options for selecting nodes for distance precomputation via program parameter
         // selectNodesWithHighestID(node, 100);
-        selectNodesWithMaxDistanceToRoot(node, 80);
+        selectNodesWithMaxDistanceToRoot(node, 100);
 
         precomputedDistancesUp[node].resize(precomputedNodes[node].size(), Graph::INFINITY_VALUE);
         precomputedDistancesDown[node].resize(precomputedNodes[node].size(), Graph::INFINITY_VALUE);
@@ -58,11 +58,11 @@ void DistancePreprocessing::precomputeDistances() {
             uint32_t neighbor = *(G->beginNeighborhood(node) + neighborID);
             if (precomputedNodes[node][neighborPrecomputationID] == neighbor) {
                 uint32_t edgeID = std::distance(headStart, G->beginNeighborhood(node) + neighborID);
-                uint32_t distanceViaNeighborUp = G->getUpwardWeight(edgeID);
-                uint32_t distanceViaNeighborDown = G->getDownwardWeight(edgeID);
+                uint32_t distanceToNeighborUp = G->getUpwardWeight(edgeID);
+                uint32_t distanceToNeighborDown = G->getDownwardWeight(edgeID);
 
-                precomputedDistancesUp[node][neighborPrecomputationID] = distanceViaNeighborUp;
-                precomputedDistancesDown[node][neighborPrecomputationID] = distanceViaNeighborDown;
+                precomputedDistancesUp[node][neighborPrecomputationID] = distanceToNeighborUp;
+                precomputedDistancesDown[node][neighborPrecomputationID] = distanceToNeighborDown;
 
                 neighborPrecomputationID--;
             }
@@ -169,7 +169,7 @@ void DistancePreprocessing::selectNodesWithMaxDistanceToRoot(uint32_t currentVer
     } else {
         distanceToRoot[currentVertex] = distanceToRoot[G->parentOf(currentVertex)] + 1;
         std::vector<uint32_t> precomputeNodesIDs(precomputedNodes[G->parentOf(currentVertex)]);
-        if (distanceToRoot[currentVertex] <= maxDistance) precomputeNodesIDs.push_back(currentVertex);
+        if (distanceToRoot[currentVertex] <= maxDistance+1) precomputeNodesIDs.push_back(G->parentOf(currentVertex));
         precomputedNodes[currentVertex] = precomputeNodesIDs;
     }
 }

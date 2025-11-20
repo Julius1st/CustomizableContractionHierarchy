@@ -13,37 +13,12 @@ uint32_t EliminationTreeQuery::query(uint32_t s, uint32_t t) {
     distUp[s] = 0;
     distDown[t] = 0;
 
-    uint32_t d = Graph::INFINITY_VALUE;
-
     // Initialize distances from precomputed nodes (query speed-up)
     auto begin = std::chrono::steady_clock::now();
-    uint32_t sIndex = 0;
-    uint32_t tIndex = 0;
-    while (sIndex < G->getPrecomputedNodes(s).size() || tIndex < G->getPrecomputedNodes(t).size()) {
-        if (sIndex < G->getPrecomputedNodes(s).size() && (tIndex >= G->getPrecomputedNodes(t).size() ||
-            G->getPrecomputedNodes(s)[sIndex] < G->getPrecomputedNodes(t)[tIndex])) {
-
-            distUp[G->getPrecomputedNodes(s)[sIndex]] = G->getPrecomputedDistancesUp(s)[sIndex];
-            sIndex++;
-
-        } else if (tIndex < G->getPrecomputedNodes(t).size() && (sIndex >= G->getPrecomputedNodes(s).size() ||
-                   G->getPrecomputedNodes(t)[tIndex] < G->getPrecomputedNodes(s)[sIndex])) {
-
-            distDown[G->getPrecomputedNodes(t)[tIndex]] = G->getPrecomputedDistancesDown(t)[tIndex];
-            tIndex++;
-
-        } else {
-            // Both are equal
-            uint32_t node = G->getPrecomputedNodes(s)[sIndex];
-            distUp[node] = G->getPrecomputedDistancesUp(s)[sIndex];
-            distDown[node] = G->getPrecomputedDistancesDown(t)[tIndex];
-            sIndex++;
-            tIndex++;
-        }
-    }
+    uint32_t d = initializeDistances(s, t);
     auto end = std::chrono::steady_clock::now();
     initTime += std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
-    initializedFields += sIndex + tIndex;
+    initializedFields += G->precomputedNodes[s].size() + G->precomputedNodes[t].size();
 
     // Original Algorithm
     while (s != t) {
@@ -90,4 +65,21 @@ void EliminationTreeQuery::ProcessVertexDown(uint32_t u, uint32_t d) {
         }
     }
     distDown[u] = Graph::INFINITY_VALUE;
+}
+
+uint32_t EliminationTreeQuery::initializeDistances(uint32_t s, uint32_t t) {
+    uint32_t d = Graph::INFINITY_VALUE;
+
+    for (uint32_t sIndex = 0; sIndex < G->precomputedNodes[s].size(); sIndex++) {
+        distUp[G->precomputedNodes[s][sIndex]] = G->precomputedDistancesUp[s][sIndex];
+    }
+
+    for (uint32_t tIndex = 0; tIndex < G->precomputedNodes[t].size(); tIndex++) {
+        distDown[G->precomputedNodes[t][tIndex]] = G->precomputedDistancesDown[t][tIndex];
+        if (distUp[G->precomputedNodes[t][tIndex]] != Graph::INFINITY_VALUE) {
+            d = std::min(d, distUp[G->precomputedNodes[t][tIndex]] + distDown[G->precomputedNodes[t][tIndex]]);
+        }
+    }
+
+    return d;
 }
