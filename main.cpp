@@ -222,11 +222,12 @@ int main(int argc, char *argv[]) {
         int norm_time = 0;
         int preproc_time = 0;
 
+        int num_queries = 10000;
         std::mt19937 mt{};
         int upperLimit = node_count -1;
         std::uniform_int_distribution distribution{ 0, upperLimit };
-        // 1000 random queries from which the average query runtime is computed
-        for (uint32_t i = 0; i < 1000; ++i) {
+        // some random queries from which the average query runtime is computed
+        for (uint32_t i = 0; i < num_queries; ++i) {
             uint32_t s = distribution(mt);
             uint32_t t = distribution(mt);
 
@@ -249,10 +250,11 @@ int main(int argc, char *argv[]) {
 
         }
 
-        cout << "done, time in microseconds (normal query): " << norm_time << " average per query: " << norm_time /1000 << endl;
-        cout << "done, time in microseconds (distance-preprocessed query): " << preproc_time << " average per query: " << preproc_time /1000 << endl;
-        std::cout << "Query init time in microseconds (avg): " << cch->getInitTime() /1000 << std::endl;
-        std::cout << "Initialized fields (avg): " << cch->getInitializedFields() /1000 << std::endl;
+        cout << "done, time in microseconds (normal query): " << norm_time << " average per query: " << norm_time /num_queries << endl;
+        cout << "Query init time in microseconds (avg): " << cch->getInitTimeNormalEngine() / num_queries << endl;
+        cout << "done, time in microseconds (distance-preprocessed query): " << preproc_time << " average per query: " << preproc_time /num_queries << endl;
+        cout << "Query init time in microseconds (avg): " << cch->getInitTimePreprocessedEngine() / num_queries << endl;
+        cout << "Initialized fields (avg): " << cch->getInitializedFields() /num_queries << endl;
 
     }catch(exception&err){
         cerr << "Stopped on exception : " << err.what() << endl;
