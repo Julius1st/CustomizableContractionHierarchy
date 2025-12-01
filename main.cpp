@@ -138,6 +138,13 @@ Graph* buildTEstGraph() {
     return new Graph(first_out, head, upward_weight, downward_weight);
 }
 
+void saveGraph(Graph* G, string name) {
+    save_vector(name + "_first_out", G->firstOut);
+    save_vector(name + "_head", G->head);
+    save_vector(name + "_upward_weight", G->upwardWeights);
+    save_vector(name + "_downward_weight", G->downwardWeights);
+}
+
 int main(int argc, char *argv[]) {
     try{
         string graph_first_out;
@@ -226,26 +233,42 @@ int main(int argc, char *argv[]) {
         std::mt19937 mt{};
         int upperLimit = node_count -1;
         std::uniform_int_distribution distribution{ 0, upperLimit };
+        vector<uint32_t> s_vector;
+        vector<uint32_t> t_vector;
+        vector<uint32_t> norm_results;
+        vector<uint32_t> preproc_results;
         // some random queries from which the average query runtime is computed
         for (uint32_t i = 0; i < num_queries; ++i) {
             uint32_t s = distribution(mt);
             uint32_t t = distribution(mt);
+            s_vector.push_back(s);
+            t_vector.push_back(t);
+        }
 
+        for (uint32_t i = 0; i < s_vector.size(); i++) {
+            uint32_t s = s_vector[i];
+            uint32_t t = t_vector[i];
             begin = std::chrono::steady_clock::now();
-            uint32_t cch_distance = cch->query(s, t);
+            norm_results.push_back(cch->query(s, t));
             end = std::chrono::steady_clock::now();
             norm_time += std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
+        }
 
+        for (uint32_t i = 0; i < s_vector.size(); i++) {
+            uint32_t s = s_vector[i];
+            uint32_t t = t_vector[i];
             begin = std::chrono::steady_clock::now();
-            uint32_t cch_precomputed_distance = cch->queryWithDistancePreprocessing(s, t);
+            preproc_results.push_back(cch->queryWithDistancePreprocessing(s, t));
             end = std::chrono::steady_clock::now();
             preproc_time += std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
+        }
 
-            if(cch_distance != cch_precomputed_distance) {
+        for (uint32_t i = 0; i < norm_results.size(); i++) {
+            if(norm_results[i] != preproc_results[i]) {
                 cout << "Distances from CCH query and distance-preprocessed CCH query do not match. Distance from normal query: "
-                                    + std::to_string(cch_distance) + ", distance from distance-preprocessed query: "
-                                    + std::to_string(cch_precomputed_distance) + " for query from "
-                                    + std::to_string(s) + " to " + std::to_string(t) + ". This was query number: " + std::to_string(i) << endl;
+                                    + std::to_string(norm_results[i]) + ", distance from distance-preprocessed query: "
+                                    + std::to_string(preproc_results[i]) + " for query from "
+                                    + std::to_string(s_vector[i]) + " to " + std::to_string(t_vector[i]) + ". This was query number: " + std::to_string(i) << endl;
             }
 
         }
