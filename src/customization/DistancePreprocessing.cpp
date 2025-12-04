@@ -41,7 +41,7 @@ void DistancePreprocessing::precomputeDistances() {
 
         // TODO: Different options for selecting nodes for distance precomputation via program parameter
         // selectNodesWithHighestID(node, 100);
-        selectNodesWithMaxDistanceToRoot(node, 100);
+        selectNodesWithMaxDistanceToRoot(node, 60);
 
         precomputedDistancesUp[node].resize(precomputedNodes[node].size(), Graph::INFINITY_VALUE);
         precomputedDistancesDown[node].resize(precomputedNodes[node].size(), Graph::INFINITY_VALUE);
@@ -117,44 +117,27 @@ void DistancePreprocessing::createGraphWithPrecomputedDistances() {
 
     newFirstOut[0] = 0;
 
-    auto globalHeadStart = G->beginNeighborhood(0);
+    auto headStart = G->beginNeighborhood(0);
 
 
-    for (uint32_t u = 0; u < numVertices; ++u) {
+    for (uint32_t node = 0; node < G->numVertices(); node++) {
+        uint32_t precomputedNodesID = precomputedNodes[node].size()-1;
+        uint32_t addedEdges = 0;
+        for (auto it = G->beginNeighborhood(node); it != G->endNeighborhood(node); it++) {
+            uint32_t neighbor = *it;
 
-        auto nbrBegin = G->beginNeighborhood(u);
-        auto nbrEnd   = G->endNeighborhood(u);
+            // If all precomputed nodes have been skipped (underflow) or the neighbor is smaller than the current precomputed node, add the edge
+            if (precomputedNodesID > precomputedNodes[node].size()-1 || neighbor < precomputedNodes[node][precomputedNodesID]) {
+                newHead.push_back(neighbor);
+                newUpwardWeights.push_back(G->getUpwardWeight(std::distance(headStart, it)));
+                newDownwardWeights.push_back(G->getDownwardWeight(std::distance(headStart, it)));
+                addedEdges++;
+            }
+            else if (neighbor > precomputedNodes[node][precomputedNodesID]) precomputedNodesID--;
 
-        // Pointer to descending-sorted list of nodes to skip
-        const auto &skipList = precomputedNodes[u];
-        int64_t k = skipList.size() - 1;   // signed, safe to decrement below -1
-
-        uint32_t added = 0;
-
-        for (auto it = nbrBegin; it != nbrEnd; ++it) {
-
-            uint32_t v = *it;
-
-            // Desc-sorted skip list:
-            // while skipList[k] > v, move left
-            while (k >= 0 && skipList[k] > v)
-                --k;
-
-            // If match → skip edge
-            if (k >= 0 && skipList[k] == v)
-                continue;
-
-            // Otherwise, add edge
-            newHead.push_back(v);
-
-            const uint32_t idx = std::distance(globalHeadStart, it);
-            newUpwardWeights.push_back(G->getUpwardWeight(idx));
-            newDownwardWeights.push_back(G->getDownwardWeight(idx));
-
-            ++added;
+            // If neighbor == precomputedNodes[node][precomputedNodesID], skip adding the edge
         }
-
-        newFirstOut[u + 1] = newFirstOut[u] + added;
+        newFirstOut[node +1] = newFirstOut[node] + addedEdges;
     }
 
     Gnew = std::make_unique<Graph>(newFirstOut, newHead, newUpwardWeights, newDownwardWeights, eliminationTree,
