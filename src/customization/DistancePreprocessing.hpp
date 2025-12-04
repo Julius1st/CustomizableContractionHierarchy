@@ -4,16 +4,17 @@
 
 #pragma once
 #include "core/Graph.hpp"
+#include <memory>
 
 class DistancePreprocessing {
 public:
     explicit DistancePreprocessing(Graph* graph);
 
-    Graph* run();
+    std::unique_ptr<Graph> run();
 
 private:
     Graph* G;
-    Graph* Gnew;
+    std::unique_ptr<Graph> Gnew;
     std::vector<uint32_t> eliminationTree;
 
     std::vector<std::vector<uint32_t>> precomputedNodes; // nodes to which distances have been precomputed

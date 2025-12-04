@@ -5,25 +5,25 @@
 #include <iostream>
 
 CCH::CCH(Graph* baseGraph, std::vector<uint32_t> &order) : G(baseGraph), rankOrder(order) {
-    builder = new ContractionBuilder(G, rankOrder);
+    builder = std::make_unique<ContractionBuilder>(G, rankOrder);
 }
 
 void CCH::preprocess() {
     Gplus = builder->buildGplus();
-    basicCustomizer = new BasicCustomizer(Gplus);
+    basicCustomizer = std::make_unique<BasicCustomizer>(Gplus.get());
 }
 
 void CCH::customize() {
     basicCustomizer->run();
     // Remove to use the distance-preprocessed graph for queries:
-    queryEngine = new EliminationTreeQuery(Gplus);
+    queryEngine = std::make_unique<EliminationTreeQuery>(Gplus.get());
 
     // TODO: create option to switch between normal and distance-preprocessed queries with program parameter
 
     // For query speed-up:
-    distancePreprocessing = new DistancePreprocessing(Gplus);
+    distancePreprocessing = std::make_unique<DistancePreprocessing>(Gplus.get());
     GwithPrecomputedDistances = distancePreprocessing->run();
-    distancePreprocessedQueryEngine = new EliminationTreeQuery(GwithPrecomputedDistances);
+    distancePreprocessedQueryEngine = std::make_unique<EliminationTreeQuery>(GwithPrecomputedDistances.get());
 
     //printEliminationTreeInformationOfGplus();
     //printEliminationTreeInformationOfNewGraph();

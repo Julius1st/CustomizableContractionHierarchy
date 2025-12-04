@@ -5,18 +5,19 @@
 #pragma once
 #include "core/Graph.hpp"
 #include <vector>
+#include <memory>
 
 // Builds the Augmented Graph G+ and the elimination tree
 class ContractionBuilder {
 public:
     ContractionBuilder(Graph* g, std::vector<uint32_t>& rankOrder) : G(g), order(rankOrder) {}
 
-    Graph* buildGplus();
+    std::unique_ptr<Graph> buildGplus();
     uint32_t getRank(uint32_t u) {return rank[u];} // rank[oldID] = newID
 
 private:
     const Graph* G;
-    Graph* Gplus;
+    std::unique_ptr<Graph> Gplus;
     std::vector<uint32_t> rank; // rank[oldID] = newID
     std::vector<uint32_t> order; // order[newID] = oldID
     std::vector<uint32_t> GplusHead;

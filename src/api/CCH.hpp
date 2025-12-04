@@ -9,6 +9,7 @@
 #include "query/EliminationTreeQuery.hpp"
 #include "DistancePreprocessing.hpp"
 #include <vector>
+#include <memory>
 
 // Facade Class
 class CCH {
@@ -26,20 +27,20 @@ public:
     //For testing:
     void printEliminationTreeInformationOfGplus();
     void printEliminationTreeInformationOfNewGraph();
-    Graph* getGplus() const { return Gplus; }
+    Graph* getGplus() const { return Gplus.get(); }
 
 private:
     Graph* G;
-    Graph* Gplus;
+    std::unique_ptr<Graph> Gplus;
 
     std::vector<uint32_t> rankOrder;
 
-    ContractionBuilder* builder;
-    BasicCustomizer* basicCustomizer;
-    EliminationTreeQuery* queryEngine;
-    EliminationTreeQuery* distancePreprocessedQueryEngine;
+    std::unique_ptr<ContractionBuilder> builder;
+    std::unique_ptr<BasicCustomizer> basicCustomizer;
+    std::unique_ptr<EliminationTreeQuery> queryEngine;
+    std::unique_ptr<EliminationTreeQuery> distancePreprocessedQueryEngine;
 
     // For query speed-up:
-    DistancePreprocessing* distancePreprocessing;
-    Graph* GwithPrecomputedDistances;
+    std::unique_ptr<DistancePreprocessing> distancePreprocessing;
+    std::unique_ptr<Graph> GwithPrecomputedDistances;
 };

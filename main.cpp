@@ -3,6 +3,7 @@
 #include <chrono>
 #include <queue>
 #include <random>
+#include <memory>
 #include "CCH.hpp"
 #include "VectorIO.h"
 
@@ -128,14 +129,14 @@ uint32_t dijkstra(uint32_t s, uint32_t t, vector<vector<DirectedEdge>> adj, vect
     return dist[t];
 }
 
-Graph* buildTEstGraph() {
+auto buildTEstGraph() {
     // Build a small test graph
     vector<uint32_t> first_out = {0, 2, 3, 4, 5, 7, 8, 8, 8};
     vector<uint32_t> head = {2, 3, 3, 4, 4, 5, 6, 7};
     vector<uint32_t> upward_weight = {2, 3, 13, 24, 34, 45, 46, 57};
     vector<uint32_t> downward_weight = {20, 30, 31, 42, 43, 54, 64, 75};
 
-    return new Graph(first_out, head, upward_weight, downward_weight);
+    return make_unique<Graph>(first_out, head, upward_weight, downward_weight);
 }
 
 void saveGraph(Graph* G, string name) {
@@ -204,15 +205,20 @@ int main(int argc, char *argv[]) {
         cleanInputData(first_out, head, weight, clean_first_out, clean_head, clean_upward_weight, clean_downward_weight, adj);
 
         cout << "done" << endl;
+        first_out.clear();
+        head.clear();
+        weight.clear();
 
-        Graph* G = new Graph(clean_first_out, clean_head, clean_upward_weight, clean_downward_weight);
+        //Graph* G = new Graph(clean_first_out, clean_head, clean_upward_weight, clean_downward_weight);
+        auto G = make_unique<Graph>(clean_first_out, clean_head, clean_upward_weight, clean_downward_weight);
 
         // activate to use test graph:
         //G = buildTEstGraph();
         //order = {0, 1, 2, 3, 4, 5, 6, 7};
         //node_count = G->numVertices();
 
-        CCH* cch = new CCH(G, order);
+        //CCH* cch = new CCH(G.get(), order);
+        auto cch = make_unique<CCH>(G.get(), order);
         std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
         cout << "Preprocessing Graph ... " << flush;
         cch->preprocess();

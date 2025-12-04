@@ -2,14 +2,15 @@
 // Created by Julius on 26.09.2025.
 //
 
+#include <memory>
 #include "ContractionBuilder.hpp"
 
-Graph* ContractionBuilder::buildGplus() {
+std::unique_ptr<Graph> ContractionBuilder::buildGplus() {
 
     permuteNodeIDs();
     contractGraph();
 
-    return Gplus;
+    return std::move(Gplus);
 }
 
 void ContractionBuilder::permuteNodeIDs() {
@@ -135,5 +136,5 @@ void ContractionBuilder::contractGraph() {
     }
 
     GplusFirstOut[n] = GplusHead.size();
-    Gplus = new Graph(GplusFirstOut, GplusHead, GplusUpwardWeights, GplusDownwardWeights, ET);
+    Gplus = std::make_unique<Graph>(GplusFirstOut, GplusHead, GplusUpwardWeights, GplusDownwardWeights, ET);
 }

@@ -16,7 +16,7 @@ DistancePreprocessing::DistancePreprocessing(Graph* graph) : G(graph) {
     distanceToRoot.resize(G->numVertices(), Graph::INFINITY_VALUE);
 }
 
-Graph* DistancePreprocessing::run() {
+std::unique_ptr<Graph> DistancePreprocessing::run() {
 
     auto begin = std::chrono::steady_clock::now();
     precomputeDistances();
@@ -30,7 +30,7 @@ Graph* DistancePreprocessing::run() {
     std::cout << "This many Edges have been deleted in Distance Preprocessing: " << G->numEdges() - Gnew->numEdges() << std::endl;
 
     // Gnew->printGraphInfo();
-    return Gnew;
+    return std::move(Gnew);
 }
 
 void DistancePreprocessing::precomputeDistances() {
@@ -157,7 +157,7 @@ void DistancePreprocessing::createGraphWithPrecomputedDistances() {
         newFirstOut[u + 1] = newFirstOut[u] + added;
     }
 
-    Gnew = new Graph(newFirstOut, newHead, newUpwardWeights, newDownwardWeights, eliminationTree,
+    Gnew = std::make_unique<Graph>(newFirstOut, newHead, newUpwardWeights, newDownwardWeights, eliminationTree,
                      precomputedNodes, precomputedDistancesUp, precomputedDistancesDown);
 }
 
