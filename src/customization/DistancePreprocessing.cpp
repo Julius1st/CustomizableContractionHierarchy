@@ -12,8 +12,6 @@ DistancePreprocessing::DistancePreprocessing(Graph* graph) : G(graph) {
     precomputedNodes.resize(G->numVertices());
     precomputedDistancesUp.resize(G->numVertices());
     precomputedDistancesDown.resize(G->numVertices());
-
-    distanceToRoot.resize(G->numVertices(), Graph::INFINITY_VALUE);
 }
 
 std::unique_ptr<Graph> DistancePreprocessing::run() {
@@ -109,18 +107,19 @@ void DistancePreprocessing::precomputeDistances() {
 
 void DistancePreprocessing::createGraphWithPrecomputedDistances() {
     uint32_t numVertices = G->numVertices();
+    uint32_t numEdges = G->numEdges();
 
     std::vector<uint32_t> newFirstOut(numVertices + 1);
-    std::vector<uint32_t> newHead;
-    std::vector<uint32_t> newUpwardWeights;
-    std::vector<uint32_t> newDownwardWeights;
+    std::vector<uint32_t> newHead(numEdges);
+    std::vector<uint32_t> newUpwardWeights(numEdges);
+    std::vector<uint32_t> newDownwardWeights(numEdges);
 
     newFirstOut[0] = 0;
 
     auto headStart = G->beginNeighborhood(0);
 
-
-    for (uint32_t node = 0; node < G->numVertices(); node++) {
+    uint32_t overallAddedEdges = 0;
+    for (uint32_t node = 0; node < numVertices; node++) {
         uint32_t precomputedNodesID = precomputedNodes[node].size()-1;
         uint32_t addedEdges = 0;
         for (auto it = G->beginNeighborhood(node); it != G->endNeighborhood(node); it++) {
@@ -128,10 +127,11 @@ void DistancePreprocessing::createGraphWithPrecomputedDistances() {
 
             // If all precomputed nodes have been skipped (underflow) or the neighbor is smaller than the current precomputed node, add the edge
             if (precomputedNodesID > precomputedNodes[node].size()-1 || neighbor < precomputedNodes[node][precomputedNodesID]) {
-                newHead.push_back(neighbor);
-                newUpwardWeights.push_back(G->getUpwardWeight(std::distance(headStart, it)));
-                newDownwardWeights.push_back(G->getDownwardWeight(std::distance(headStart, it)));
+                newHead[overallAddedEdges] = neighbor;
+                newUpwardWeights[overallAddedEdges] = G->getUpwardWeight(std::distance(headStart, it));
+                newDownwardWeights[overallAddedEdges] = G->getDownwardWeight(std::distance(headStart, it));
                 addedEdges++;
+                overallAddedEdges++;
             }
             else if (neighbor > precomputedNodes[node][precomputedNodesID]) precomputedNodesID--;
 
@@ -139,6 +139,9 @@ void DistancePreprocessing::createGraphWithPrecomputedDistances() {
         }
         newFirstOut[node +1] = newFirstOut[node] + addedEdges;
     }
+    newHead.resize(overallAddedEdges);
+    newUpwardWeights.resize(overallAddedEdges);
+    newDownwardWeights.resize(overallAddedEdges);
 
     Gnew = std::make_unique<Graph>(newFirstOut, newHead, newUpwardWeights, newDownwardWeights, eliminationTree,
                      precomputedNodes, precomputedDistancesUp, precomputedDistancesDown);
@@ -166,11 +169,8 @@ void DistancePreprocessing::selectNodesWithMaxDistanceToRoot(uint32_t currentVer
     }
     if (G->parentOf(currentVertex) == Graph::INFINITY_VALUE) {
         precomputedNodes[currentVertex] = std::vector<uint32_t>();
-        distanceToRoot[currentVertex] = 0;
     } else {
-        distanceToRoot[currentVertex] = distanceToRoot[G->parentOf(currentVertex)] + 1;
-        std::vector<uint32_t> precomputeNodesIDs(precomputedNodes[G->parentOf(currentVertex)]);
-        if (distanceToRoot[currentVertex] <= maxDistance+1) precomputeNodesIDs.push_back(G->parentOf(currentVertex));
-        precomputedNodes[currentVertex] = precomputeNodesIDs;
+        precomputedNodes [currentVertex] = precomputedNodes[G->parentOf(currentVertex)];
+        if (precomputedNodes[G->parentOf(currentVertex)].size() +1 <= maxDistance) precomputedNodes[currentVertex].push_back(G->parentOf(currentVertex));
     }
 }

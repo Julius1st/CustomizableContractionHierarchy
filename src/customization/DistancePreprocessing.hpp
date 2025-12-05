@@ -27,5 +27,4 @@ private:
     // Different options for Vertex selection for distance precomputation
     void selectNodesWithHighestID(uint32_t currentVertex, uint32_t numberOfNodesToSelect);
     void selectNodesWithMaxDistanceToRoot(uint32_t currentVertex, uint32_t maxDistance);
-    std::vector<uint32_t> distanceToRoot;
 };
