@@ -232,8 +232,8 @@ int main(int argc, char *argv[]) {
         cout << "done, time in milliseconds: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << endl;
 
         cout << "Querying distances ... " << endl << flush;
-        int norm_time = 0;
-        int preproc_time = 0;
+        long norm_time = 0;
+        long preproc_time = 0;
 
         int num_queries = 10000;
         std::mt19937 mt{};
@@ -243,6 +243,7 @@ int main(int argc, char *argv[]) {
         vector<uint32_t> t_vector;
         vector<uint32_t> norm_results;
         vector<uint32_t> preproc_results;
+
         // some random queries from which the average query runtime is computed
         for (uint32_t i = 0; i < num_queries; ++i) {
             uint32_t s = distribution(mt);
@@ -251,23 +252,23 @@ int main(int argc, char *argv[]) {
             t_vector.push_back(t);
         }
 
+        begin = std::chrono::steady_clock::now();
         for (uint32_t i = 0; i < s_vector.size(); i++) {
             uint32_t s = s_vector[i];
             uint32_t t = t_vector[i];
-            begin = std::chrono::steady_clock::now();
             norm_results.push_back(cch->query(s, t));
-            end = std::chrono::steady_clock::now();
-            norm_time += std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
         }
+        end = std::chrono::steady_clock::now();
+        norm_time = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
 
+        begin = std::chrono::steady_clock::now();
         for (uint32_t i = 0; i < s_vector.size(); i++) {
             uint32_t s = s_vector[i];
             uint32_t t = t_vector[i];
-            begin = std::chrono::steady_clock::now();
             preproc_results.push_back(cch->queryWithDistancePreprocessing(s, t));
-            end = std::chrono::steady_clock::now();
-            preproc_time += std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
         }
+        end = std::chrono::steady_clock::now();
+        preproc_time = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
 
         for (uint32_t i = 0; i < norm_results.size(); i++) {
             if(norm_results[i] != preproc_results[i]) {
