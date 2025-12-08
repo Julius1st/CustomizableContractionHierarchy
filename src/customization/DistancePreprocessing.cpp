@@ -39,7 +39,7 @@ void DistancePreprocessing::precomputeDistances() {
 
         // TODO: Different options for selecting nodes for distance precomputation via program parameter
         // selectNodesWithHighestID(node, 100);
-        selectNodesWithMaxDistanceToRoot(node, 60);
+        selectNodesWithMaxDistanceToRoot(node,60);
 
         precomputedDistancesUp[node].resize(precomputedNodes[node].size(), Graph::INFINITY_VALUE);
         precomputedDistancesDown[node].resize(precomputedNodes[node].size(), Graph::INFINITY_VALUE);
@@ -118,15 +118,31 @@ void DistancePreprocessing::createGraphWithPrecomputedDistances() {
 
     auto headStart = G->beginNeighborhood(0);
 
+    // TODO: Improve this method
     uint32_t overallAddedEdges = 0;
     for (uint32_t node = 0; node < numVertices; node++) {
-        uint32_t precomputedNodesID = precomputedNodes[node].size()-1;
+        // if no nodes are precomputed, add all edges to the graph
+        if (precomputedNodes[node].empty()) {
+            uint32_t addedEdges = 0;
+            for (auto it = G->beginNeighborhood(node); it != G->endNeighborhood(node); it++) {
+                uint32_t neighbor = *it;
+                newHead[overallAddedEdges] = neighbor;
+                newUpwardWeights[overallAddedEdges] = G->getUpwardWeight(std::distance(headStart, it));
+                newDownwardWeights[overallAddedEdges] = G->getDownwardWeight(std::distance(headStart, it));
+                addedEdges++;
+                overallAddedEdges++;
+            }
+            newFirstOut[node +1] = newFirstOut[node] + addedEdges;
+            continue;
+        }
+
+        int64_t precomputedNodesID = precomputedNodes[node].size()-1;
         uint32_t addedEdges = 0;
         for (auto it = G->beginNeighborhood(node); it != G->endNeighborhood(node); it++) {
             uint32_t neighbor = *it;
 
-            // If all precomputed nodes have been skipped (underflow) or the neighbor is smaller than the current precomputed node, add the edge
-            if (precomputedNodesID > precomputedNodes[node].size()-1 || neighbor < precomputedNodes[node][precomputedNodesID]) {
+            // If all precomputed nodes have been skipped or the neighbor is smaller than the current precomputed node, add the edge
+            if (precomputedNodesID < 0 || neighbor < precomputedNodes[node][precomputedNodesID]) {
                 newHead[overallAddedEdges] = neighbor;
                 newUpwardWeights[overallAddedEdges] = G->getUpwardWeight(std::distance(headStart, it));
                 newDownwardWeights[overallAddedEdges] = G->getDownwardWeight(std::distance(headStart, it));
