@@ -10,7 +10,7 @@ class DistancePreprocessing {
 public:
     explicit DistancePreprocessing(Graph* graph);
 
-    std::unique_ptr<Graph> run();
+    std::unique_ptr<Graph> run(uint32_t preprocessingParameter);
 
 private:
     Graph* G;
@@ -21,7 +21,7 @@ private:
     std::vector<std::vector<uint32_t>> precomputedDistancesUp; // Corresponding distances from all other nodes to each node in precomputedNodes (precomputedDistancesUp[node][i] = distance from node to precomputedNodes[node][i])
     std::vector<std::vector<uint32_t>> precomputedDistancesDown; // Corresponding distances from all other nodes to each node in precomputedNodes
 
-    void precomputeDistances();
+    void precomputeDistances(uint32_t preprocessingParameter);
     void createGraphWithPrecomputedDistances();
 
     // Different options for Vertex selection for distance precomputation

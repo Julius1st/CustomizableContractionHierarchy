@@ -14,10 +14,10 @@ DistancePreprocessing::DistancePreprocessing(Graph* graph) : G(graph) {
     precomputedDistancesDown.resize(G->numVertices());
 }
 
-std::unique_ptr<Graph> DistancePreprocessing::run() {
+std::unique_ptr<Graph> DistancePreprocessing::run(uint32_t preprocessingParameter) {
 
     auto begin = std::chrono::steady_clock::now();
-    precomputeDistances();
+    precomputeDistances(preprocessingParameter);
     auto end = std::chrono::steady_clock::now();
     std::cout << "Distance Preprocessing done, time in milliseconds: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << std::endl;
     begin = std::chrono::steady_clock::now();
@@ -31,7 +31,7 @@ std::unique_ptr<Graph> DistancePreprocessing::run() {
     return std::move(Gnew);
 }
 
-void DistancePreprocessing::precomputeDistances() {
+void DistancePreprocessing::precomputeDistances(uint32_t preprocessingParameter) {
     // used to calculate EdgeIDs
     auto headStart = G->beginNeighborhood(0);
 
@@ -39,7 +39,7 @@ void DistancePreprocessing::precomputeDistances() {
 
         // TODO: Different options for selecting nodes for distance precomputation via program parameter
         // selectNodesWithHighestID(node, 100);
-        selectNodesWithMaxDistanceToRoot(node,60);
+        selectNodesWithMaxDistanceToRoot(node, preprocessingParameter);
 
         precomputedDistancesUp[node].resize(precomputedNodes[node].size(), Graph::INFINITY_VALUE);
         precomputedDistancesDown[node].resize(precomputedNodes[node].size(), Graph::INFINITY_VALUE);

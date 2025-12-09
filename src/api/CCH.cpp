@@ -13,7 +13,7 @@ void CCH::preprocess() {
     basicCustomizer = std::make_unique<BasicCustomizer>(Gplus.get());
 }
 
-void CCH::customize() {
+void CCH::customize(uint32_t preprocessingParameter) {
     basicCustomizer->run();
     // Remove to use the distance-preprocessed graph for queries:
     queryEngine = std::make_unique<EliminationTreeQuery>(Gplus.get());
@@ -22,7 +22,7 @@ void CCH::customize() {
 
     // For query speed-up:
     distancePreprocessing = std::make_unique<DistancePreprocessing>(Gplus.get());
-    GwithPrecomputedDistances = distancePreprocessing->run();
+    GwithPrecomputedDistances = distancePreprocessing->run(preprocessingParameter);
     distancePreprocessedQueryEngine = std::make_unique<EliminationTreeQuery>(GwithPrecomputedDistances.get());
 
     //printEliminationTreeInformationOfGplus();

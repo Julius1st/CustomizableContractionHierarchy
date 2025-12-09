@@ -217,6 +217,8 @@ int main(int argc, char *argv[]) {
         //order = {0, 1, 2, 3, 4, 5, 6, 7};
         //node_count = G->numVertices();
 
+        uint32_t preprocessingParameter = 60; // The parameter used for distance precomputation in the distance-preprocessed CCH queries
+
         //CCH* cch = new CCH(G.get(), order);
         auto cch = make_unique<CCH>(G.get(), order);
         std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
@@ -227,7 +229,7 @@ int main(int argc, char *argv[]) {
 
         cout << "Customizing Graph ... " << std::endl << flush;
         begin = std::chrono::steady_clock::now();
-        cch->customize();
+        cch->customize(preprocessingParameter);
         end = std::chrono::steady_clock::now();
         cout << "done, time in milliseconds: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << endl;
 
