@@ -76,9 +76,7 @@ uint32_t EliminationTreeQuery::initializeDistances(uint32_t s, uint32_t t) {
 
     for (uint32_t tIndex = 0; tIndex < G->precomputedNodes[t].size(); tIndex++) {
         distDown[G->precomputedNodes[t][tIndex]] = G->precomputedDistancesDown[t][tIndex];
-        if (distUp[G->precomputedNodes[t][tIndex]] != Graph::INFINITY_VALUE) {
-            d = std::min(d, distUp[G->precomputedNodes[t][tIndex]] + distDown[G->precomputedNodes[t][tIndex]]);
-        }
+        d = std::min(d, distUp[G->precomputedNodes[t][tIndex]] + distDown[G->precomputedNodes[t][tIndex]]);
     }
 
     return d;
