@@ -129,7 +129,7 @@ uint32_t dijkstra(uint32_t s, uint32_t t, vector<vector<DirectedEdge>> adj, vect
     return dist[t];
 }
 
-auto buildTEstGraph() {
+auto buildTestGraph() {
     // Build a small test graph
     vector<uint32_t> first_out = {0, 2, 3, 4, 5, 7, 8, 8, 8};
     vector<uint32_t> head = {2, 3, 3, 4, 4, 5, 6, 7};
@@ -147,7 +147,7 @@ void saveGraph(Graph* G, string name) {
 }
 
 int main(int argc, char *argv[]) {
-    try{
+    try {
         string graph_first_out;
         string graph_head;
         string graph_weight;
@@ -158,14 +158,17 @@ int main(int argc, char *argv[]) {
         string ch_forward_weight;
         string ch_backward_weight;
 
-        if(argc != 5){
-            cerr << argv[0] << " graph_first_out graph_head graph_weight ch_order" << endl;
+        uint32_t preprocessingParameter; // The parameter used for distance precomputation in the distance-preprocessed CCH queries
+
+        if (argc != 6) {
+            cerr << argv[0] << " graph_first_out graph_head graph_weight ch_order preprocessing_parameter" << endl;
             return 1;
-        }else{
+        } else {
             graph_first_out = argv[1];
             graph_head = argv[2];
             graph_weight = argv[3];
             ch_order = argv[4];
+            preprocessingParameter = stoi(argv[5]);
         }
 
 
@@ -208,15 +211,14 @@ int main(int argc, char *argv[]) {
         first_out.clear();
         head.clear();
         weight.clear();
+        adj.clear();
 
         auto G = make_unique<Graph>(clean_first_out, clean_head, clean_upward_weight, clean_downward_weight);
 
         // activate to use test graph:
-        //G = buildTEstGraph();
+        //G = buildTestGraph();
         //order = {0, 1, 2, 3, 4, 5, 6, 7};
         //node_count = G->numVertices();
-
-        uint32_t preprocessingParameter = 60; // The parameter used for distance precomputation in the distance-preprocessed CCH queries
 
         //CCH* cch = new CCH(G.get(), order);
         auto cch = make_unique<CCH>(G.get(), order);
@@ -224,30 +226,17 @@ int main(int argc, char *argv[]) {
         cch->preprocess();
         cout << "done" << endl;
 
-        cout << "Customizing Graph ... " << std::endl << flush;
+        cout << "Customizing Graph ... " << flush;
         cch->customize();
         cout << "done" << endl;
 
-        cout << "Preprocessing Distances with parameter " << preprocessingParameter << " ... " << std::endl << flush;
-        cch->preprocessDistances(preprocessingParameter);
-
-        cout << "Querying distances ... " << endl << flush;
-
+        // some random queries from which the average query runtime is computed
         int num_queries = 10000;
         std::mt19937 mt{};
         int upperLimit = node_count -1;
         std::uniform_int_distribution distribution{ 0, upperLimit };
         vector<uint32_t> s_vector;
         vector<uint32_t> t_vector;
-        vector<uint32_t> norm_results;
-        vector<uint32_t> preproc_results;
-
-        long norm_time;
-        long preproc_time;
-        std::chrono::steady_clock::time_point begin;
-        std::chrono::steady_clock::time_point end;
-
-        // some random queries from which the average query runtime is computed
         for (uint32_t i = 0; i < num_queries; ++i) {
             uint32_t s = distribution(mt);
             uint32_t t = distribution(mt);
@@ -255,39 +244,53 @@ int main(int argc, char *argv[]) {
             t_vector.push_back(t);
         }
 
-        begin = std::chrono::steady_clock::now();
-        for (uint32_t i = 0; i < s_vector.size(); i++) {
-            uint32_t s = s_vector[i];
-            uint32_t t = t_vector[i];
-            norm_results.push_back(cch->query(s, t));
-        }
-        end = std::chrono::steady_clock::now();
-        norm_time = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
+        for (int param = 0; param <= preprocessingParameter; param+=10) {
+            cout << "----------------------------------------" << endl;
+            cout << "Preprocessing Distances with parameter " << param << " ... " << std::endl << flush;
+            cch->preprocessDistances(preprocessingParameter);
+            cout << "Querying distances ... " << endl << flush;
 
-        begin = std::chrono::steady_clock::now();
-        for (uint32_t i = 0; i < s_vector.size(); i++) {
-            uint32_t s = s_vector[i];
-            uint32_t t = t_vector[i];
-            preproc_results.push_back(cch->queryWithDistancePreprocessing(s, t));
-        }
-        end = std::chrono::steady_clock::now();
-        preproc_time = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
+            vector<uint32_t> norm_results;
+            vector<uint32_t> preproc_results;
 
-        for (uint32_t i = 0; i < norm_results.size(); i++) {
-            if(norm_results[i] != preproc_results[i]) {
-                cout << "Distances from CCH query and distance-preprocessed CCH query do not match. Distance from normal query: "
-                                    + std::to_string(norm_results[i]) + ", distance from distance-preprocessed query: "
-                                    + std::to_string(preproc_results[i]) + " for query from "
-                                    + std::to_string(s_vector[i]) + " to " + std::to_string(t_vector[i]) + ". This was query number: " + std::to_string(i) << endl;
+            long norm_time;
+            long preproc_time;
+            std::chrono::steady_clock::time_point begin;
+            std::chrono::steady_clock::time_point end;
+
+            begin = std::chrono::steady_clock::now();
+            for (uint32_t i = 0; i < s_vector.size(); i++) {
+                uint32_t s = s_vector[i];
+                uint32_t t = t_vector[i];
+                norm_results.push_back(cch->query(s, t));
+            }
+            end = std::chrono::steady_clock::now();
+            norm_time = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
+
+            begin = std::chrono::steady_clock::now();
+            for (uint32_t i = 0; i < s_vector.size(); i++) {
+                uint32_t s = s_vector[i];
+                uint32_t t = t_vector[i];
+                preproc_results.push_back(cch->queryWithDistancePreprocessing(s, t));
+            }
+            end = std::chrono::steady_clock::now();
+            preproc_time = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
+
+            for (uint32_t i = 0; i < norm_results.size(); i++) {
+                if(norm_results[i] != preproc_results[i]) {
+                    cout << "Distances from CCH query and distance-preprocessed CCH query do not match. Distance from normal query: "
+                                        + std::to_string(norm_results[i]) + ", distance from distance-preprocessed query: "
+                                        + std::to_string(preproc_results[i]) + " for query from "
+                                        + std::to_string(s_vector[i]) + " to " + std::to_string(t_vector[i]) + ". This was query number: " + std::to_string(i) << endl;
+                }
             }
 
+            cout << "time in microseconds (normal query): " << norm_time << " average per query: " << norm_time / num_queries << endl;
+            cout << "Query init time in microseconds (avg): " << cch->getInitTimeNormalEngine() / num_queries << endl;
+            cout << "time in microseconds (distance-preprocessed query): " << preproc_time << " average per query: " << preproc_time / num_queries << endl;
+            cout << "Query init time in microseconds (avg): " << cch->getInitTimePreprocessedEngine() / num_queries << endl;
+            cout << "Initialized fields (avg): " << cch->getInitializedFields() / num_queries << endl;
         }
-
-        cout << "time in microseconds (normal query): " << norm_time << " average per query: " << norm_time /num_queries << endl;
-        cout << "Query init time in microseconds (avg): " << cch->getInitTimeNormalEngine() / num_queries << endl;
-        cout << "time in microseconds (distance-preprocessed query): " << preproc_time << " average per query: " << preproc_time /num_queries << endl;
-        cout << "Query init time in microseconds (avg): " << cch->getInitTimePreprocessedEngine() / num_queries << endl;
-        cout << "Initialized fields (avg): " << cch->getInitializedFields() /num_queries << endl;
 
     }catch(exception&err){
         cerr << "Stopped on exception : " << err.what() << endl;
