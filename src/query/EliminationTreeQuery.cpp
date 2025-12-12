@@ -50,6 +50,7 @@ void EliminationTreeQuery::ProcessVertexUp(uint32_t u, uint32_t d) {
             uint32_t v = *it;
             uint32_t uvIndex = std::distance(headStart, it);
             distUp[v] = std::min(distUp[v], distUp[u] + G->getUpwardWeight(uvIndex));
+            relaxedEdges++;
         }
     }
     distUp[u] = Graph::INFINITY_VALUE;
@@ -62,6 +63,7 @@ void EliminationTreeQuery::ProcessVertexDown(uint32_t u, uint32_t d) {
             uint32_t v = *it;
             uint32_t uvIndex = std::distance(headStart, it);
             distDown[v] = std::min(distDown[v], distDown[u] + G->getDownwardWeight(uvIndex));
+            relaxedEdges++;
         }
     }
     distDown[u] = Graph::INFINITY_VALUE;

@@ -17,6 +17,8 @@ public:
     int getInitTime() const { return initTime; }
     uint32_t getInitializedFields() const { return initializedFields; }
 
+    uint32_t relaxedEdges = 0;
+
 private:
     const Graph* G;
 

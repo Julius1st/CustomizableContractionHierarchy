@@ -251,6 +251,8 @@ int main(int argc, char *argv[]) {
         vector<uint32_t> num_deleted_edges;
         vector<long> distance_preprocessing_times;
         vector<long> graph_creation_times;
+        vector<uint64_t> relaxedEdgesNormal;
+        vector<uint64_t> relaxedEdgesPreprocessed;
 
         for (int param = 0; param <= preprocessingParameter; param+=10) {
             cout << "----------------------------------------" << endl;
@@ -258,6 +260,7 @@ int main(int argc, char *argv[]) {
             cch->preprocessDistances(param);
             cout << "Querying distances ... " << endl << flush;
 
+            cch->resetRelaxedEdgesCounters();
             vector<uint32_t> norm_results(num_queries);
             vector<uint32_t> preproc_results(num_queries);
 
@@ -306,6 +309,8 @@ int main(int argc, char *argv[]) {
             num_deleted_edges.push_back(cch->getNumDeletedEdges());
             distance_preprocessing_times.push_back(cch->getDistancePreprocessingTime());
             graph_creation_times.push_back(cch->getGraphCreationTime());
+            relaxedEdgesNormal.push_back(cch->getRelaxedEdgesNormalEngine() / num_queries);
+            relaxedEdgesPreprocessed.push_back(cch->getRelaxedEdgesPreprocessedEngine() / num_queries);
         }
 
         cout << "All tests done." << endl;
@@ -331,6 +336,12 @@ int main(int argc, char *argv[]) {
         cout << "]" << endl;
         cout << "Graph Creation Times (milliseconds): [";
         for (auto val : graph_creation_times) cout << val << ", ";
+        cout << "]" << endl;
+        cout << "Relaxed Edges Normal Engine: [";
+        for (auto val : relaxedEdgesNormal) cout << val << ", ";
+        cout << "]" << endl;
+        cout << "Relaxed Edges Preprocessed Engine: [";
+        for (auto val : relaxedEdgesPreprocessed) cout << val << ", ";
         cout << "]" << endl;
 
     }catch(exception&err){

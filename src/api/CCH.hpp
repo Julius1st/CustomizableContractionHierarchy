@@ -25,9 +25,15 @@ public:
     int getInitTimeNormalEngine() const { return queryEngine->getInitTime(); }
     int getInitTimePreprocessedEngine() const { return distancePreprocessedQueryEngine->getInitTime(); }
     uint32_t getInitializedFields() const { return distancePreprocessedQueryEngine->getInitializedFields(); }
+    uint64_t getRelaxedEdgesNormalEngine() const { return queryEngine->relaxedEdges; }
+    uint64_t getRelaxedEdgesPreprocessedEngine() const { return distancePreprocessedQueryEngine->relaxedEdges; }
     uint32_t getNumDeletedEdges() const { return distancePreprocessing->getNumDeletedEdges(); }
     long getDistancePreprocessingTime() const { return distancePreprocessing->getProcessingTime(); }
     long getGraphCreationTime() const { return distancePreprocessing->getGraphCreationTime(); }
+    void resetRelaxedEdgesCounters() {
+        queryEngine->relaxedEdges = 0;
+        distancePreprocessedQueryEngine->relaxedEdges = 0;
+    }
 
     //For testing:
     void printEliminationTreeInformationOfGplus();
