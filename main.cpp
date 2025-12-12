@@ -244,14 +244,22 @@ int main(int argc, char *argv[]) {
             t_vector.push_back(t);
         }
 
+        vector<uint32_t> preprocessing_distances;
+        vector<long> normal_query_times;
+        vector<long> preproc_query_times;
+        vector<uint32_t> initialized_fields;
+        vector<uint32_t> num_deleted_edges;
+        vector<long> distance_preprocessing_times;
+        vector<long> graph_creation_times;
+
         for (int param = 0; param <= preprocessingParameter; param+=10) {
             cout << "----------------------------------------" << endl;
             cout << "Preprocessing Distances with parameter " << param << " ... " << std::endl << flush;
-            cch->preprocessDistances(preprocessingParameter);
+            cch->preprocessDistances(param);
             cout << "Querying distances ... " << endl << flush;
 
-            vector<uint32_t> norm_results;
-            vector<uint32_t> preproc_results;
+            vector<uint32_t> norm_results(num_queries);
+            vector<uint32_t> preproc_results(num_queries);
 
             long norm_time;
             long preproc_time;
@@ -262,7 +270,7 @@ int main(int argc, char *argv[]) {
             for (uint32_t i = 0; i < s_vector.size(); i++) {
                 uint32_t s = s_vector[i];
                 uint32_t t = t_vector[i];
-                norm_results.push_back(cch->query(s, t));
+                norm_results[i] = cch->query(s, t);
             }
             end = std::chrono::steady_clock::now();
             norm_time = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
@@ -271,7 +279,7 @@ int main(int argc, char *argv[]) {
             for (uint32_t i = 0; i < s_vector.size(); i++) {
                 uint32_t s = s_vector[i];
                 uint32_t t = t_vector[i];
-                preproc_results.push_back(cch->queryWithDistancePreprocessing(s, t));
+                preproc_results[i] = cch->queryWithDistancePreprocessing(s, t);
             }
             end = std::chrono::steady_clock::now();
             preproc_time = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
@@ -290,7 +298,40 @@ int main(int argc, char *argv[]) {
             cout << "time in microseconds (distance-preprocessed query): " << preproc_time << " average per query: " << preproc_time / num_queries << endl;
             cout << "Query init time in microseconds (avg): " << cch->getInitTimePreprocessedEngine() / num_queries << endl;
             cout << "Initialized fields (avg): " << cch->getInitializedFields() / num_queries << endl;
+
+            preprocessing_distances.push_back(param);
+            normal_query_times.push_back(norm_time/num_queries);
+            preproc_query_times.push_back(preproc_time/num_queries);
+            initialized_fields.push_back(cch->getInitializedFields() / num_queries);
+            num_deleted_edges.push_back(cch->getNumDeletedEdges());
+            distance_preprocessing_times.push_back(cch->getDistancePreprocessingTime());
+            graph_creation_times.push_back(cch->getGraphCreationTime());
         }
+
+        cout << "All tests done." << endl;
+        // Print summary arrays for further evaluation
+        cout << "----------------------------------------" << endl;
+        cout << "Preprocessing Distances Parameters: [";
+        for (auto val : preprocessing_distances) cout << val << ", ";
+        cout << "]" << endl;
+        cout << "Normal Query Times (microseconds): [";
+        for (auto val : normal_query_times) cout << val << ", ";
+        cout << "]" << endl;
+        cout << "Distance-Preprocessed Query Times (microseconds): [";
+        for (auto val : preproc_query_times) cout << val << ", ";
+        cout << "]" << endl;
+        cout << "Initialized Fields (avg): [";
+        for (auto val : initialized_fields) cout << val << ", ";
+        cout << "]" << endl;
+        cout << "Number of Deleted Edges: [";
+        for (auto val : num_deleted_edges) cout << val << ", ";
+        cout << "]" << endl;
+        cout << "Distance Preprocessing Times (milliseconds): [";
+        for (auto val : distance_preprocessing_times) cout << val << ", ";
+        cout << "]" << endl;
+        cout << "Graph Creation Times (milliseconds): [";
+        for (auto val : graph_creation_times) cout << val << ", ";
+        cout << "]" << endl;
 
     }catch(exception&err){
         cerr << "Stopped on exception : " << err.what() << endl;

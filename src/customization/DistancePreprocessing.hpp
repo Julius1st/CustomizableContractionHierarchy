@@ -12,6 +12,10 @@ public:
 
     std::unique_ptr<Graph> run(uint32_t preprocessingParameter);
 
+    uint32_t getNumDeletedEdges() const { return numDeletedEdges; }
+    long getProcessingTime() const { return processingTime; }
+    long getGraphCreationTime() const { return graphCreationTime; }
+
 private:
     Graph* G;
     std::unique_ptr<Graph> Gnew;
@@ -20,6 +24,10 @@ private:
     std::vector<std::vector<uint32_t>> precomputedNodes; // nodes to which distances have been precomputed
     std::vector<std::vector<uint32_t>> precomputedDistancesUp; // Corresponding distances from all other nodes to each node in precomputedNodes (precomputedDistancesUp[node][i] = distance from node to precomputedNodes[node][i])
     std::vector<std::vector<uint32_t>> precomputedDistancesDown; // Corresponding distances from all other nodes to each node in precomputedNodes
+
+    long processingTime = 0;
+    long graphCreationTime = 0;
+    uint32_t numDeletedEdges = 0;
 
     void precomputeDistances(uint32_t preprocessingParameter);
     void createGraphWithPrecomputedDistances();

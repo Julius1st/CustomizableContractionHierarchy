@@ -19,13 +19,17 @@ std::unique_ptr<Graph> DistancePreprocessing::run(uint32_t preprocessingParamete
     auto begin = std::chrono::steady_clock::now();
     precomputeDistances(preprocessingParameter);
     auto end = std::chrono::steady_clock::now();
-    std::cout << "Distance Preprocessing done, time in milliseconds: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << std::endl;
+    processingTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+    std::cout << "Distance Preprocessing done, time in milliseconds: " << processingTime << std::endl;
+
     begin = std::chrono::steady_clock::now();
     createGraphWithPrecomputedDistances();
     end = std::chrono::steady_clock::now();
-    std::cout << "Graph Creation with Precomputed Distances done, time in milliseconds: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << std::endl;
+    graphCreationTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+    std::cout << "Graph Creation with Precomputed Distances done, time in milliseconds: " << graphCreationTime << std::endl;
 
-    std::cout << "This many Edges have been deleted in Distance Preprocessing: " << G->numEdges() - Gnew->numEdges() << std::endl;
+    numDeletedEdges = G->numEdges() - Gnew->numEdges();
+    std::cout << "This many Edges have been deleted in Distance Preprocessing: " << numDeletedEdges << std::endl;
 
     // Gnew->printGraphInfo();
     return std::move(Gnew);

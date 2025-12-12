@@ -21,9 +21,13 @@ public:
     void preprocessDistances(uint32_t preprocessingParameter);
     uint32_t query(uint32_t s, uint32_t t);
     uint32_t queryWithDistancePreprocessing(uint32_t s, uint32_t t);
+
     int getInitTimeNormalEngine() const { return queryEngine->getInitTime(); }
     int getInitTimePreprocessedEngine() const { return distancePreprocessedQueryEngine->getInitTime(); }
     uint32_t getInitializedFields() const { return distancePreprocessedQueryEngine->getInitializedFields(); }
+    uint32_t getNumDeletedEdges() const { return distancePreprocessing->getNumDeletedEdges(); }
+    long getDistancePreprocessingTime() const { return distancePreprocessing->getProcessingTime(); }
+    long getGraphCreationTime() const { return distancePreprocessing->getGraphCreationTime(); }
 
     //For testing:
     void printEliminationTreeInformationOfGplus();
