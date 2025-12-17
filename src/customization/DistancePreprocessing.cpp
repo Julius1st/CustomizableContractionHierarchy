@@ -49,6 +49,8 @@ void DistancePreprocessing::precomputeDistances(uint32_t preprocessingParameter)
 
         precomputedDistancesUp[node].resize(precomputedNodes[node].size(), Graph::INFINITY_VALUE);
         precomputedDistancesDown[node].resize(precomputedNodes[node].size(), Graph::INFINITY_VALUE);
+        successorUp[node].resize(precomputedNodes[node].size(), Graph::INFINITY_VALUE);
+        successorDown[node].resize(precomputedNodes[node].size(), Graph::INFINITY_VALUE);
 
         if (precomputedNodes[node].empty()) continue;
         if (G->beginNeighborhood(node) == G->endNeighborhood(node)) continue; // No neighbors
