@@ -12,6 +12,8 @@ DistancePreprocessing::DistancePreprocessing(Graph* graph) : G(graph) {
     precomputedNodes.resize(G->numVertices());
     precomputedDistancesUp.resize(G->numVertices());
     precomputedDistancesDown.resize(G->numVertices());
+    successorUp.resize(G->numVertices());
+    successorDown.resize(G->numVertices());
 }
 
 std::unique_ptr<Graph> DistancePreprocessing::run(uint32_t preprocessingParameter) {
@@ -65,6 +67,8 @@ void DistancePreprocessing::precomputeDistances(uint32_t preprocessingParameter)
 
                 precomputedDistancesUp[node][neighborPrecomputationID] = distanceToNeighborUp;
                 precomputedDistancesDown[node][neighborPrecomputationID] = distanceToNeighborDown;
+                successorUp[node][neighborPrecomputationID] = neighbor;
+                successorDown[node][neighborPrecomputationID] = neighborID;
 
                 neighborPrecomputationID--;
             }
@@ -76,6 +80,7 @@ void DistancePreprocessing::precomputeDistances(uint32_t preprocessingParameter)
             }
         }
 
+        // Update distances via neighbors that also have precomputed distances
         for (auto itv = G->beginNeighborhood(node); itv != G->endNeighborhood(node); itv++) {
             uint32_t neighbor = *itv;
             uint32_t lowerPrecomputationID = 0;
@@ -95,9 +100,11 @@ void DistancePreprocessing::precomputeDistances(uint32_t preprocessingParameter)
                     // Update distances if smaller via neighbor
                     if (distanceViaNeighborUp < precomputedDistancesUp[node][lowerPrecomputationID]) {
                         precomputedDistancesUp[node][lowerPrecomputationID] = distanceViaNeighborUp;
+                        successorUp[node][lowerPrecomputationID] = neighbor;
                     }
                     if (distanceViaNeighborDown < precomputedDistancesDown[node][lowerPrecomputationID]) {
                         precomputedDistancesDown[node][lowerPrecomputationID] = distanceViaNeighborDown;
+                        successorDown[node][lowerPrecomputationID] = neighbor;
                     }
 
                     lowerPrecomputationID++;
@@ -164,7 +171,7 @@ void DistancePreprocessing::createGraphWithPrecomputedDistances() {
     newDownwardWeights.resize(overallAddedEdges);
 
     Gnew = std::make_unique<Graph>(newFirstOut, newHead, newUpwardWeights, newDownwardWeights, eliminationTree,
-                     precomputedNodes, precomputedDistancesUp, precomputedDistancesDown);
+                     precomputedNodes, precomputedDistancesUp, precomputedDistancesDown, successorUp, successorDown);
 }
 
 void DistancePreprocessing::selectNodesWithHighestID(uint32_t currentVertex, uint32_t numberOfNodesToSelect) {

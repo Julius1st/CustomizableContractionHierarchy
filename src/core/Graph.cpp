@@ -31,9 +31,11 @@ Graph::Graph(std::vector<uint32_t> &firstOut, std::vector<uint32_t> &head, std::
 }
 
 Graph::Graph(std::vector<uint32_t> &firstOut, std::vector<uint32_t> &head, std::vector<uint32_t>& upwardWeightsVec, std::vector<uint32_t>& downwardWeightsVec, std::vector<uint32_t>& eliminationTree,
-             std::vector<std::vector<uint32_t>> &precomputedNodes, std::vector<std::vector<uint32_t>> &precomputedDistancesUp, std::vector<std::vector<uint32_t>> &precomputedDistancesDown) :
+             std::vector<std::vector<uint32_t>> &precomputedNodes, std::vector<std::vector<uint32_t>> &precomputedDistancesUp, std::vector<std::vector<uint32_t>> &precomputedDistancesDown,
+             std::vector<std::vector<uint32_t>> &successorUp, std::vector<std::vector<uint32_t>> &successorDown) :
         firstOut(firstOut), head(head), upwardWeights(upwardWeightsVec), downwardWeights(downwardWeightsVec), eliminationTree(eliminationTree),
-        precomputedNodes(precomputedNodes), precomputedDistancesUp(precomputedDistancesUp), precomputedDistancesDown(precomputedDistancesDown) {
+        precomputedNodes(precomputedNodes), precomputedDistancesUp(precomputedDistancesUp), precomputedDistancesDown(precomputedDistancesDown),
+        successorUp(successorUp), successorDown(successorDown) {
 
     if (upwardWeights.size() != head.size())
         throw std::invalid_argument("Graph constructor: upwardWeights size does not match head size.");

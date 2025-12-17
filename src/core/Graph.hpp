@@ -15,7 +15,8 @@ public:
     Graph(std::vector<uint32_t>& firstOut, std::vector<uint32_t>& head, std::vector<uint32_t>& upwardWeights, std::vector<uint32_t>& downwardWeights);
     Graph(std::vector<uint32_t>& firstOut, std::vector<uint32_t>& head, std::vector<uint32_t>& upwardWeights, std::vector<uint32_t>& downwardWeights, std::vector<uint32_t>& eliminationTree);
     Graph(std::vector<uint32_t>& firstOut, std::vector<uint32_t>& head, std::vector<uint32_t>& upwardWeights, std::vector<uint32_t>& downwardWeights, std::vector<uint32_t>& eliminationTree,
-          std::vector<std::vector<uint32_t>> &precomputedNodes, std::vector<std::vector<uint32_t>> &precomputedDistancesUp, std::vector<std::vector<uint32_t>> &precomputedDistancesDown);
+          std::vector<std::vector<uint32_t>> &precomputedNodes, std::vector<std::vector<uint32_t>> &precomputedDistancesUp, std::vector<std::vector<uint32_t>> &precomputedDistancesDown,
+          std::vector<std::vector<uint32_t>> &successorUp, std::vector<std::vector<uint32_t>> &successorDown);
 
     uint32_t numVertices() const { return n;}
     uint32_t numEdges() const { return m;}
@@ -54,6 +55,10 @@ public:
     std::vector<std::vector<uint32_t>> precomputedNodes; // nodes to which distances have been precomputed
     std::vector<std::vector<uint32_t>> precomputedDistancesUp; // Corresponding distances from all other nodes to each node in precomputedNodes (precomputedDistancesUp[node][i] = distance from node to precomputedNodes[node][i])
     std::vector<std::vector<uint32_t>> precomputedDistancesDown; // Corresponding distances from all other nodes to each node in precomputedNodes
+
+    // For path reconstruction with precomputed distances
+    std::vector<std::vector<uint32_t>> successorUp;
+    std::vector<std::vector<uint32_t>> successorDown;
 
 private:
 

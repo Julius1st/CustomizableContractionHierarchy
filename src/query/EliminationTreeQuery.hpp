@@ -24,6 +24,8 @@ private:
 
     std::vector<uint32_t> distUp;
     std::vector<uint32_t> distDown;
+    std::vector<uint32_t> predecessorUp;
+    std::vector<uint32_t> predecessorDown;
 
     void ProcessVertexUp(uint32_t u, uint32_t d);
     void ProcessVertexDown(uint32_t u, uint32_t d);
