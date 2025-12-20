@@ -5,6 +5,7 @@
 #pragma once
 #include "core/Graph.hpp"
 #include <memory>
+#include <chrono>
 
 class DistancePreprocessing {
 public:
@@ -39,6 +40,8 @@ private:
     void createGraphWithPrecomputedDistances();
 
     // Different options for Vertex selection for distance precomputation
-    void selectNodesWithHighestID(uint32_t currentVertex, uint32_t numberOfNodesToSelect);
-    void selectNodesWithMaxDistanceToRoot(uint32_t currentVertex, uint32_t maxDistance);
+    void selectNodesWithHighestID(uint32_t numberOfNodesToSelect);
+    void selectNodesWithMaxDistanceToRoot(uint32_t maxDistance);
+    void selectNodesWithHighestWeightedInDegree(uint32_t numberOfNodesToSelect);
+    std::vector<uint32_t> size;
 };

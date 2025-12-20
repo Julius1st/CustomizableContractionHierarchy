@@ -2,9 +2,6 @@
 // Created by Julius on 05.11.2025.
 //
 
-#include <chrono>
-#include <iostream>
-#include <stdexcept>
 #include "DistancePreprocessing.hpp"
 
 DistancePreprocessing::DistancePreprocessing(Graph* graph) : G(graph) {
@@ -39,13 +36,14 @@ std::unique_ptr<Graph> DistancePreprocessing::run(uint32_t preprocessingParamete
 
 void DistancePreprocessing::precomputeDistances(uint32_t preprocessingParameter) {
     // used to calculate EdgeIDs
-    auto headStart = G->beginNeighborhood(0);
+    const auto headStart = G->beginNeighborhood(0);
+
+    // TODO: Different options for selecting nodes for distance precomputation via program parameter
+    // selectNodesWithHighestID(100);
+    // selectNodesWithMaxDistanceToRoot(preprocessingParameter);
+    selectNodesWithHighestWeightedInDegree(preprocessingParameter);
 
     for (uint32_t node = G->numVertices(); node-- > 0;) {
-
-        // TODO: Different options for selecting nodes for distance precomputation via program parameter
-        // selectNodesWithHighestID(node, 100);
-        selectNodesWithMaxDistanceToRoot(node, preprocessingParameter);
 
         precomputedDistancesUp[node].resize(precomputedNodes[node].size(), Graph::INFINITY_VALUE);
         precomputedDistancesDown[node].resize(precomputedNodes[node].size(), Graph::INFINITY_VALUE);
@@ -70,7 +68,7 @@ void DistancePreprocessing::precomputeDistances(uint32_t preprocessingParameter)
                 precomputedDistancesUp[node][neighborPrecomputationID] = distanceToNeighborUp;
                 precomputedDistancesDown[node][neighborPrecomputationID] = distanceToNeighborDown;
                 successorUp[node][neighborPrecomputationID] = neighbor;
-                successorDown[node][neighborPrecomputationID] = neighborID;
+                successorDown[node][neighborPrecomputationID] = neighbor;
 
                 neighborPrecomputationID--;
             }
@@ -85,37 +83,173 @@ void DistancePreprocessing::precomputeDistances(uint32_t preprocessingParameter)
         // Update distances via neighbors that also have precomputed distances
         for (auto itv = G->beginNeighborhood(node); itv != G->endNeighborhood(node); itv++) {
             uint32_t neighbor = *itv;
-            uint32_t lowerPrecomputationID = 0;
-            uint32_t upperPrecomputationID = 0;
+            uint32_t nodePrecomputationID = 0;
+            uint32_t neighborPrecomputationID = 0;
 
-            while (lowerPrecomputationID < precomputedNodes[node].size() && upperPrecomputationID < precomputedNodes[neighbor].size()) {
+            // TODO: make this a for loop?
+            while (nodePrecomputationID < precomputedNodes[node].size() && neighborPrecomputationID < precomputedNodes[neighbor].size()) {
+                if (node == 16262286 && neighbor == 16262287 && neighborPrecomputationID == 9) {
+                    std::cout << "Processing neighbor 16262337 of node 16262286" << std::endl;
+                    uint32_t x = std::distance(headStart, itv);
+                    uint32_t y = itv - headStart;
+                    std::cout << x << ", " << y << ", " << std::endl;
+                    std:: cout << std::addressof(*headStart) << std::addressof(*itv) << std::endl;
+                }
 
-                if (precomputedNodes[node][lowerPrecomputationID] < precomputedNodes[neighbor][upperPrecomputationID]) lowerPrecomputationID++;
+                if (precomputedNodes[node][nodePrecomputationID] < precomputedNodes[neighbor][neighborPrecomputationID]) neighborPrecomputationID++;
 
-                else if (precomputedNodes[node][lowerPrecomputationID] > precomputedNodes[neighbor][upperPrecomputationID]) upperPrecomputationID++; // This case should never happen
+                else if (precomputedNodes[node][nodePrecomputationID] > precomputedNodes[neighbor][neighborPrecomputationID]) nodePrecomputationID++;
 
                 else {
                     // Match found
-                    uint32_t distanceViaNeighborUp = G->getUpwardWeight(std::distance(headStart, itv)) + precomputedDistancesUp[neighbor][upperPrecomputationID];
-                    uint32_t distanceViaNeighborDown = G->getDownwardWeight(std::distance(headStart, itv)) + precomputedDistancesDown[neighbor][upperPrecomputationID];
+                    uint32_t distanceViaNeighborUp = G->getUpwardWeight(std::distance(headStart, itv)) + precomputedDistancesUp[neighbor][neighborPrecomputationID];
+                    uint32_t distanceViaNeighborDown = G->getDownwardWeight(std::distance(headStart, itv)) + precomputedDistancesDown[neighbor][neighborPrecomputationID];
 
                     // Update distances if smaller via neighbor
-                    if (distanceViaNeighborUp < precomputedDistancesUp[node][lowerPrecomputationID]) {
-                        precomputedDistancesUp[node][lowerPrecomputationID] = distanceViaNeighborUp;
-                        successorUp[node][lowerPrecomputationID] = neighbor;
+                    if (distanceViaNeighborUp < precomputedDistancesUp[node][nodePrecomputationID]) {
+                        precomputedDistancesUp[node][nodePrecomputationID] = distanceViaNeighborUp;
+                        successorUp[node][nodePrecomputationID] = neighbor;
                     }
-                    if (distanceViaNeighborDown < precomputedDistancesDown[node][lowerPrecomputationID]) {
-                        precomputedDistancesDown[node][lowerPrecomputationID] = distanceViaNeighborDown;
-                        successorDown[node][lowerPrecomputationID] = neighbor;
+                    if (distanceViaNeighborDown < precomputedDistancesDown[node][nodePrecomputationID]) {
+                        precomputedDistancesDown[node][nodePrecomputationID] = distanceViaNeighborDown;
+                        successorDown[node][nodePrecomputationID] = neighbor;
                     }
 
-                    lowerPrecomputationID++;
-                    upperPrecomputationID++;
+                    nodePrecomputationID++;
+                    neighborPrecomputationID++;
                 }
             }
         }
-    }
+        if (node == 8230481 ) {
+            std::cout << "Node 8230481 neighbors: ";
+            for (auto it = G->beginNeighborhood(node); it != G->endNeighborhood(node); it++) {
+                std::cout << *it << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 16262286 neighbors: ";
+            for (auto it = G->beginNeighborhood(16262286); it != G->endNeighborhood(16262286); it++) {
+                std::cout << *it << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 16262287 neighbors: ";
+            for (auto it = G->beginNeighborhood(16262287); it != G->endNeighborhood(16262287); it++) {
+                std::cout << *it << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 16262288 neighbors: ";
+            for (auto it = G->beginNeighborhood(16262288); it != G->endNeighborhood(16262288); it++) {
+                std::cout << *it << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 16262336 neighbors: ";
+            for (auto it = G->beginNeighborhood(16262336); it != G->endNeighborhood(16262336); it++) {
+                std::cout << *it << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 16262337 neighbors: ";
+            for (auto it = G->beginNeighborhood(16262337); it != G->endNeighborhood(16262337); it++) {
+                std::cout << *it << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << std::endl;
 
+            std::cout << "Node 8230481 precomputed Nodes: ";
+            for (uint32_t pn : precomputedNodes[node]) {
+                std::cout << pn << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 16262286 precomputed Nodes: ";
+            for (uint32_t pn : precomputedNodes[16262286]) {
+                std::cout << pn << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 16262287 precomputed Nodes: ";
+            for (uint32_t pn : precomputedNodes[16262287]) {
+                std::cout << pn << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 16262288 precomputed Nodes: ";
+            for (uint32_t pn : precomputedNodes[16262288]) {
+                std::cout << pn << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 16262336 precomputed Nodes: ";
+            for (uint32_t pn : precomputedNodes[16262336]) {
+                std::cout << pn << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 16262337 precomputed Nodes: ";
+            for (uint32_t pn : precomputedNodes[16262337]) {
+                std::cout << pn << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << std::endl;
+
+            std::cout << "Node 8230481 precomputed distances up: ";
+            for (uint32_t dist : precomputedDistancesUp[node]) {
+                std::cout << dist << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 16262286 precomputed distances up: ";
+            for (uint32_t dist : precomputedDistancesUp[16262286]) {
+                std::cout << dist << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 16262287 precomputed distances up: ";
+            for (uint32_t dist : precomputedDistancesUp[16262287]) {
+                std::cout << dist << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 16262288 precomputed distances up: ";
+            for (uint32_t dist : precomputedDistancesUp[16262288]) {
+                std::cout << dist << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 16262336 precomputed distances up: ";
+            for (uint32_t dist : precomputedDistancesUp[16262336]) {
+                std::cout << dist << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 16262337 precomputed distances up: ";
+            for (uint32_t dist : precomputedDistancesUp[16262337]) {
+                std::cout << dist << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << std::endl;
+
+            std::cout << "Node 8230481 successorUp: ";
+            for (uint32_t succ : successorUp[node]) {
+                std::cout << succ << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 16262286 successorUp: ";
+            for (uint32_t succ : successorUp[16262286]) {
+                std::cout << succ << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 16262287 successorUp: ";
+            for (uint32_t succ : successorUp[16262287]) {
+                std::cout << succ << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 16262288 successorUp: ";
+            for (uint32_t succ : successorUp[16262288]) {
+                std::cout << succ << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 16262336 successorUp: ";
+            for (uint32_t succ : successorUp[16262336]) {
+                std::cout << succ << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 16262337 successorUp: ";
+            for (uint32_t succ : successorUp[16262337]) {
+                std::cout << succ << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << std::endl;
+        }
+    }
 }
 
 void DistancePreprocessing::createGraphWithPrecomputedDistances() {
@@ -176,30 +310,82 @@ void DistancePreprocessing::createGraphWithPrecomputedDistances() {
                      precomputedNodes, precomputedDistancesUp, precomputedDistancesDown, successorUp, successorDown);
 }
 
-void DistancePreprocessing::selectNodesWithHighestID(uint32_t currentVertex, uint32_t numberOfNodesToSelect) {
-    if (numberOfNodesToSelect > G->numVertices()) {
-        throw std::invalid_argument("selectNodesWithHighestID called with numberOfNodesToSelect larger than number of vertices in graph.");
+void DistancePreprocessing::selectNodesWithHighestID(uint32_t numberOfNodesToSelect) {
+    for (uint32_t node = G->numVertices(); node-- > 0;) {
+        if (G->parentOf(node) == Graph::INFINITY_VALUE) {
+            precomputedNodes[node] = std::vector<uint32_t>();
+            continue;
+        }
+        precomputedNodes[node] = precomputedNodes[G->parentOf(node)];
+        if (G->parentOf(node) > G->numVertices() - numberOfNodesToSelect) precomputedNodes[node].push_back(G->parentOf(node));
     }
-    if (currentVertex == Graph::INFINITY_VALUE) {
-        throw std::invalid_argument("selectNodesWithHighestID called with INFINITY as currentVertex.");
-    }
-    if (G->parentOf(currentVertex) == Graph::INFINITY_VALUE) {
-        precomputedNodes[currentVertex] = std::vector<uint32_t>();
-        return;
-    }
-    std::vector<uint32_t> precomputeNodesIDs(precomputedNodes[G->parentOf(currentVertex)]);
-    if (G->parentOf(currentVertex) > G->numVertices() - numberOfNodesToSelect) precomputeNodesIDs.push_back(G->parentOf(currentVertex));
-    precomputedNodes[currentVertex] = precomputeNodesIDs;
 }
 
-void DistancePreprocessing::selectNodesWithMaxDistanceToRoot(uint32_t currentVertex, uint32_t maxDistance) {
-    if (currentVertex >= G->numVertices()) {
-        throw std::invalid_argument("selectNodesWithMaxDistanceToRoot called with out-of-bounds currentVertex: " + std::to_string(currentVertex));
+void DistancePreprocessing::selectNodesWithMaxDistanceToRoot(uint32_t maxDistance) {
+    for (uint32_t node = G->numVertices(); node-- > 0;) {
+        if (G->parentOf(node) == Graph::INFINITY_VALUE) {
+            precomputedNodes[node] = std::vector<uint32_t>();
+            continue;
+        }
+        precomputedNodes[node] = precomputedNodes[G->parentOf(node)];
+        if (precomputedNodes[node].size() < maxDistance) precomputedNodes[node].push_back(G->parentOf(node));
     }
-    if (G->parentOf(currentVertex) == Graph::INFINITY_VALUE) {
-        precomputedNodes[currentVertex] = std::vector<uint32_t>();
-    } else {
-        precomputedNodes [currentVertex] = precomputedNodes[G->parentOf(currentVertex)];
-        if (precomputedNodes[G->parentOf(currentVertex)].size() +1 <= maxDistance) precomputedNodes[currentVertex].push_back(G->parentOf(currentVertex));
+}
+
+// This function inserts item into vec such that vec remains sorted according to pred
+template< typename T, typename Pred >
+typename std::vector<T>::iterator insert_sorted( std::vector<T> & vec, T const& item, Pred pred ) {
+    return vec.insert(
+           std::lower_bound( vec.begin(), vec.end(), item, pred ),
+           item
+        );
+}
+auto pred = [](const std::tuple<uint32_t, uint32_t>& a, const std::tuple<uint32_t, uint32_t>& b) {
+    return std::get<1>(a) > std::get<1>(b);
+};
+
+void DistancePreprocessing::selectNodesWithHighestWeightedInDegree(uint32_t numberOfNodesToSelect) {
+    if (numberOfNodesToSelect == 0) {
+        precomputedNodes = std::vector<std::vector<uint32_t>> (G->numVertices());
+        return;
+    }
+    size = std::vector<uint32_t> (G->numVertices(), 1);
+    std::vector<std::vector<std::tuple<uint32_t, uint32_t>>> precomputedNodesTemp(G->numVertices());
+
+    // computation of size vector, which is a weighted sum of the in-degrees of all descendants
+    for (uint32_t node = 0; node < G->numVertices(); node++) {
+        for (auto it = G->beginNeighborhood(node); it != G->endNeighborhood(node); it++) {
+            uint32_t neighbor = *it;
+            size[neighbor] += size[node];
+        }
+    }
+
+    // choose vertices with the highest size value
+    for (uint32_t node = G->numVertices(); node-- > 0;) {
+        uint32_t parent = G->parentOf(node);
+        if (parent == Graph::INFINITY_VALUE) {
+            precomputedNodesTemp[node] = std::vector<std::tuple<uint32_t, uint32_t>>();
+            continue;
+        }
+        precomputedNodesTemp[node] = precomputedNodesTemp[parent];
+
+        // Fill precomputedNodesTemp as it is not yet at capacity
+        if (precomputedNodesTemp[parent].size() < numberOfNodesToSelect) {
+            insert_sorted(precomputedNodesTemp[node], std::make_tuple(parent, size[parent]), pred);
+            continue;
+        }
+        // Replace smallest element if current node has larger size
+        if (size[parent] > std::get<1>(precomputedNodesTemp[node].back())) {
+            insert_sorted(precomputedNodesTemp[node], std::make_tuple(parent, size[parent]), pred);
+            precomputedNodesTemp[node].pop_back();
+        }
+    }
+
+    // Fill actual precomputedNodes vector, in descending order of node IDs
+    for (uint32_t node = 0; node < G->numVertices(); node++) {
+        for (auto it = precomputedNodesTemp[node].begin(); it != precomputedNodesTemp[node].end(); it++) {
+            precomputedNodes[node].push_back(std::get<0>(*it));
+        }
+        std::sort(precomputedNodes[node].begin(), precomputedNodes[node].end(), std::greater<>());
     }
 }
