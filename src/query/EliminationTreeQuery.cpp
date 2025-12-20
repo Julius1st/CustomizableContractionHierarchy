@@ -12,6 +12,7 @@ EliminationTreeQuery::EliminationTreeQuery(Graph *g) : G(g){
 }
 
 uint32_t EliminationTreeQuery::query(uint32_t s, uint32_t t) {
+    //std::cout << "EliminationTreeQuery from " << s << " to " << t << " with parents " << G->parentOf(s) << " and " << G->parentOf(t) << std::endl;
     distUp[s] = 0;
     distDown[t] = 0;
 
@@ -22,6 +23,7 @@ uint32_t EliminationTreeQuery::query(uint32_t s, uint32_t t) {
     initTime += std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
     initializedFields += G->precomputedNodes[s].size() + G->precomputedNodes[t].size();
 
+    //std::cout << "Test 1" << std::endl;
     // Original Algorithm
     while (s != t) {
         if (s < t) {
@@ -32,6 +34,7 @@ uint32_t EliminationTreeQuery::query(uint32_t s, uint32_t t) {
             t = G->parentOf(t);
         }
     }
+    //std::cout << "Test 2" << std::endl;
 
     uint32_t u = s;
 
@@ -81,10 +84,53 @@ uint32_t EliminationTreeQuery::initializeDistances(uint32_t s, uint32_t t) {
     uint32_t d = Graph::INFINITY_VALUE;
 
     for (uint32_t sIndex = 0; sIndex < G->precomputedNodes[s].size(); sIndex++) {
+        uint32_t precNodesIndex = sIndex;
         distUp[G->precomputedNodes[s][sIndex]] = G->precomputedDistancesUp[s][sIndex];
         uint32_t currentVertex = s;
 
-        // TODO: Is it sufficient to do this loop only once, for the first element in precomputedNodes[s]? So, are all other nodes allways on that path?
+        while (currentVertex != G->precomputedNodes[s][sIndex]) {
+            if (precNodesIndex < G->precomputedNodes[currentVertex].size() && G->precomputedNodes[currentVertex][precNodesIndex] == G->precomputedNodes[s][sIndex]) {
+                if (precNodesIndex >= G->successorUp[currentVertex].size()) std::cout << "precNodesIndex out of bounds!" << std::endl;
+                if (G->successorUp[currentVertex][precNodesIndex] >= G->numVertices()) std::cout << "successorUp out of bounds! " << G->successorUp[currentVertex][precNodesIndex] << " currentVertex: " << currentVertex << std::endl;
+                predecessorUp[G->successorUp[currentVertex][precNodesIndex]] = currentVertex;
+                currentVertex = G->successorUp[currentVertex][precNodesIndex];
+            } else {
+                const auto it = std::lower_bound(G->precomputedNodes[currentVertex].begin(), G->precomputedNodes[currentVertex].end(), G->precomputedNodes[s][sIndex], std::greater<uint32_t>());
+                if (it == G->precomputedNodes[currentVertex].end()) {
+                    std::__throw_logic_error("Did not find lower bound!");
+                }
+                precNodesIndex = it - G->precomputedNodes[currentVertex].begin();
+            }
+        }
+    }
+
+    //std::cout << "Test 3" << std::endl;
+    for (uint32_t tIndex = 0; tIndex < G->precomputedNodes[t].size(); tIndex++) {
+        uint32_t precNodesIndex = tIndex;
+        distDown[G->precomputedNodes[t][tIndex]] = G->precomputedDistancesDown[t][tIndex];
+        uint32_t currentVertex = t;
+
+        while (currentVertex != G->precomputedNodes[t][tIndex]) {
+            if (precNodesIndex < G->precomputedNodes[currentVertex].size() && G->precomputedNodes[currentVertex][precNodesIndex] == G->precomputedNodes[t][tIndex]) {
+                predecessorDown[G->successorDown[currentVertex][precNodesIndex]] = currentVertex;
+                currentVertex = G->successorDown[currentVertex][precNodesIndex];
+            } else {
+                const auto it = std::lower_bound(G->precomputedNodes[currentVertex].begin(), G->precomputedNodes[currentVertex].end(), G->precomputedNodes[t][tIndex], std::greater<uint32_t>());;
+                if (it == G->precomputedNodes[currentVertex].end()) {
+                    std::__throw_logic_error("Did not find lower bound!");
+                }
+                precNodesIndex = it - G->precomputedNodes[currentVertex].begin();
+            }
+        }
+
+        d = std::min(d, distUp[G->precomputedNodes[t][tIndex]] + distDown[G->precomputedNodes[t][tIndex]]);
+    }
+    return d;
+
+    for (uint32_t sIndex = 0; sIndex < G->precomputedNodes[s].size(); sIndex++) {
+        distUp[G->precomputedNodes[s][sIndex]] = G->precomputedDistancesUp[s][sIndex];
+        uint32_t currentVertex = s;
+
         // The prerequisite for this to work is, that in every precomputedNodes[x][sIndex] the same sIndex corresponds to the same node in the elimination tree. (For this sub tree)
         while (currentVertex != G->precomputedNodes[s][sIndex]) {
             predecessorUp[G->successorUp[currentVertex][sIndex]] = currentVertex;
@@ -96,9 +142,9 @@ uint32_t EliminationTreeQuery::initializeDistances(uint32_t s, uint32_t t) {
         distDown[G->precomputedNodes[t][tIndex]] = G->precomputedDistancesDown[t][tIndex];
 
         uint32_t currentVertex = t;
-        while (currentVertex != G->precomputedNodes[s][tIndex]) {
-            predecessorDown[G->successorUp[currentVertex][tIndex]] = currentVertex;
-            currentVertex = G->successorUp[currentVertex][tIndex];
+        while (currentVertex != G->precomputedNodes[t][tIndex]) {
+            predecessorDown[G->successorDown[currentVertex][tIndex]] = currentVertex;
+            currentVertex = G->successorDown[currentVertex][tIndex];
         }
 
         d = std::min(d, distUp[G->precomputedNodes[t][tIndex]] + distDown[G->precomputedNodes[t][tIndex]]);
