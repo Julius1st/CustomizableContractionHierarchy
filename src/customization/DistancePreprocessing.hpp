@@ -43,5 +43,5 @@ private:
     void selectNodesWithHighestID(uint32_t numberOfNodesToSelect);
     void selectNodesWithMaxDistanceToRoot(uint32_t maxDistance);
     void selectNodesWithHighestWeightedInDegree(uint32_t numberOfNodesToSelect);
-    std::vector<uint32_t> size;
+    std::vector<std::tuple<uint32_t, uint32_t>> size;
 };
