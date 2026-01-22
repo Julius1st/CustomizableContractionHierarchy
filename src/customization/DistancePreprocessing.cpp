@@ -113,35 +113,228 @@ void DistancePreprocessing::precomputeDistances(uint32_t preprocessingParameter)
                 }
             }
         }
-        if (node == 8230481 ) {
-            std::cout << "Node 8230481 neighbors: ";
+        /*
+        if (node == 15215059 ) {
+            std::cout << "Node 15215059 neighbors: ";
             for (auto it = G->beginNeighborhood(node); it != G->endNeighborhood(node); it++) {
+                std::cout << *it << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 15215062 neighbors: ";
+            for (auto it = G->beginNeighborhood(15215062); it != G->endNeighborhood(15215062); it++) {
+                std::cout << *it << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 15215068 neighbors: ";
+            for (auto it = G->beginNeighborhood(15215068); it != G->endNeighborhood(15215068); it++) {
+                std::cout << *it << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 15215111 neighbors: ";
+            for (auto it = G->beginNeighborhood(15215111); it != G->endNeighborhood(15215111); it++) {
+                std::cout << *it << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 15215117 neighbors: ";
+            for (auto it = G->beginNeighborhood(15215117); it != G->endNeighborhood(15215117); it++) {
+                std::cout << *it << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 15215118 neighbors: ";
+            for (auto it = G->beginNeighborhood(15215118); it != G->endNeighborhood(15215118); it++) {
+                std::cout << *it << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 15215119 neighbors: ";
+            for (auto it = G->beginNeighborhood(15215119); it != G->endNeighborhood(15215119); it++) {
+                std::cout << *it << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 15222034 neighbors: ";
+            for (auto it = G->beginNeighborhood(15222034); it != G->endNeighborhood(15222034); it++) {
+                std::cout << *it << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 15222031 neighbors: ";
+            for (auto it = G->beginNeighborhood(15222031); it != G->endNeighborhood(15222031); it++) {
                 std::cout << *it << ", ";
             }
             std::cout << std::endl;
             std::cout << std::endl;
 
-            std::cout << "Node 8230481 precomputed Nodes: ";
+            std::cout << "Node 15215059 precomputed Nodes: ";
             for (uint32_t pn : precomputedNodes[node]) {
+                std::cout << pn << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 15215062 precomputed Nodes: ";
+            for (uint32_t pn : precomputedNodes[15215062]) {
+                std::cout << pn << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 15215068 precomputed Nodes: ";
+            for (uint32_t pn : precomputedNodes[15215068]) {
+                std::cout << pn << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 15215111 precomputed Nodes: ";
+            for (uint32_t pn : precomputedNodes[15215111]) {
+                std::cout << pn << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 15215117 precomputed Nodes: ";
+            for (uint32_t pn : precomputedNodes[15215117]) {
+                std::cout << pn << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 15215118 precomputed Nodes: ";
+            for (uint32_t pn : precomputedNodes[15215118]) {
+                std::cout << pn << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 15215119 precomputed Nodes: ";
+            for (uint32_t pn : precomputedNodes[15215119]) {
+                std::cout << pn << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 15222034 precomputed Nodes: ";
+            for (uint32_t pn : precomputedNodes[15222034]) {
+                std::cout << pn << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 15222031 precomputed Nodes: ";
+            for (uint32_t pn : precomputedNodes[15222031]) {
                 std::cout << pn << ", ";
             }
             std::cout << std::endl;
             std::cout << std::endl;
 
-            std::cout << "Node 8230481 precomputed distances up: ";
+            std::cout << "Node 15215059 precomputed distances up: ";
             for (uint32_t dist : precomputedDistancesUp[node]) {
+                std::cout << dist << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 15215062 precomputed distances up: ";
+            for (uint32_t dist : precomputedDistancesUp[15215062]) {
+                std::cout << dist << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 15215068 precomputed distances up: ";
+            for (uint32_t dist : precomputedDistancesUp[15215068]) {
+                std::cout << dist << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 15215111 precomputed distances up: ";
+            for (uint32_t dist : precomputedDistancesUp[15215111]) {
+                std::cout << dist << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 15215117 precomputed distances up: ";
+            for (uint32_t dist : precomputedDistancesUp[15215117]) {
+                std::cout << dist << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 15215118 precomputed distances up: ";
+            for (uint32_t dist : precomputedDistancesUp[15215118]) {
+                std::cout << dist << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 15215119 precomputed distances up: ";
+            for (uint32_t dist : precomputedDistancesUp[15215119]) {
+                std::cout << dist << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 15222034 precomputed distances up: ";
+            for (uint32_t dist : precomputedDistancesUp[15222034]) {
+                std::cout << dist << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 15222031 precomputed distances up: ";
+            for (uint32_t dist : precomputedDistancesUp[15222031]) {
                 std::cout << dist << ", ";
             }
             std::cout << std::endl;
             std::cout << std::endl;
 
-            std::cout << "Node 8230481 successorUp: ";
+            std::cout << "Node 15215059 successorUp: ";
             for (uint32_t succ : successorUp[node]) {
                 std::cout << succ << ", ";
             }
             std::cout << std::endl;
+            std::cout << "Node 15215062 successorUp: ";
+            for (uint32_t succ : successorUp[15215062]) {
+                std::cout << succ << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 15215068 successorUp: ";
+            for (uint32_t succ : successorUp[15215068]) {
+                std::cout << succ << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 15215111 successorUp: ";
+            for (uint32_t succ : successorUp[15215111]) {
+                std::cout << succ << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 15215117 successorUp: ";
+            for (uint32_t succ : successorUp[15215117]) {
+                std::cout << succ << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 15215118 successorUp: ";
+            for (uint32_t succ : successorUp[15215118]) {
+                std::cout << succ << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 15215119 successorUp: ";
+            for (uint32_t succ : successorUp[15215119]) {
+                std::cout << succ << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 15222034 successorUp: ";
+            for (uint32_t succ : successorUp[15222034]) {
+                std::cout << succ << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 15222031 successorUp: ";
+            for (uint32_t succ : successorUp[15222031]) {
+                std::cout << succ << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << std::endl;
+
+            std::cout << "Node 15215111 EdgeWeights: ";
+            for (uint32_t i = G->firstOut[15215111]; i < G->firstOut[15215111 +1]; i++) {
+                std::cout << G->getUpwardWeight(i) << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 15215117 EdgeWeights: ";
+            for (uint32_t i = G->firstOut[15215117]; i < G->firstOut[15215117 +1]; i++) {
+                std::cout << G->getUpwardWeight(i) << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 15215118 EdgeWeights: ";
+            for (uint32_t i = G->firstOut[15215118]; i < G->firstOut[15215118 +1]; i++) {
+                std::cout << G->getUpwardWeight(i) << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 15215119 EdgeWeights: ";
+            for (uint32_t i = G->firstOut[15215119]; i < G->firstOut[15215119 +1]; i++) {
+                std::cout << G->getUpwardWeight(i) << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 15222034 EdgeWeights: ";
+            for (uint32_t i = G->firstOut[15222034]; i < G->firstOut[15222034 +1]; i++) {
+                std::cout << G->getUpwardWeight(i) << ", ";
+            }
+            std::cout << std::endl;
+            std::cout << "Node 15222031 EdgeWeights: ";
+            for (uint32_t i = G->firstOut[15222031]; i < G->firstOut[15222031 +1]; i++) {
+                std::cout << G->getUpwardWeight(i) << ", ";
+            }
             std::cout << std::endl;
         }
+        */
     }
 }
 
@@ -177,10 +370,37 @@ void DistancePreprocessing::createGraphWithPrecomputedDistances() {
         }
 
         int64_t precomputedNodesID = precomputedNodes[node].size()-1;
+        // TODO replace added edges with overall added edges
         uint32_t addedEdges = 0;
+
+        auto it = G->beginNeighborhood(node);
+        while (it != G->endNeighborhood(node)) {
+            uint32_t neighbor = *it;
+
+            // If all precomputed nodes have been skipped or the neighbor is smaller than the current precomputed node, add the edge
+            if (precomputedNodesID < 0 || neighbor < precomputedNodes[node][precomputedNodesID]) {
+                newHead[overallAddedEdges] = neighbor;
+                newUpwardWeights[overallAddedEdges] = G->getUpwardWeight(std::distance(headStart, it));
+                newDownwardWeights[overallAddedEdges] = G->getDownwardWeight(std::distance(headStart, it));
+                addedEdges++;
+                overallAddedEdges++;
+                it++;
+            }
+            else if (neighbor > precomputedNodes[node][precomputedNodesID]) precomputedNodesID--;
+
+            // If neighbor == precomputedNodes[node][precomputedNodesID], skip adding the edge
+            else {
+                it++;
+                precomputedNodesID--;
+            }
+        }
+        /*
         for (auto it = G->beginNeighborhood(node); it != G->endNeighborhood(node); it++) {
             uint32_t neighbor = *it;
 
+            if (neighbor == 16945555) {
+                std::cout << "Test" << std::endl;
+            }
             // If all precomputed nodes have been skipped or the neighbor is smaller than the current precomputed node, add the edge
             if (precomputedNodesID < 0 || neighbor < precomputedNodes[node][precomputedNodesID]) {
                 newHead[overallAddedEdges] = neighbor;
@@ -193,6 +413,7 @@ void DistancePreprocessing::createGraphWithPrecomputedDistances() {
 
             // If neighbor == precomputedNodes[node][precomputedNodesID], skip adding the edge
         }
+        */
         newFirstOut[node +1] = newFirstOut[node] + addedEdges;
     }
     newHead.resize(overallAddedEdges);
@@ -201,6 +422,19 @@ void DistancePreprocessing::createGraphWithPrecomputedDistances() {
 
     Gnew = std::make_unique<Graph>(newFirstOut, newHead, newUpwardWeights, newDownwardWeights, eliminationTree,
                      precomputedNodes, precomputedDistancesUp, precomputedDistancesDown, successorUp, successorDown);
+
+    return;
+    std::cout << "In new Graph:" << std::endl;
+    for (uint32_t i = 0; i < Gnew->numVertices(); i++) {
+        auto headBeginning = Gnew->beginNeighborhood(0);
+        for (auto j = Gnew->beginNeighborhood(i); j != Gnew->endNeighborhood(i); j++) {
+            uint32_t neighbor = *j;
+            if (neighbor == 16945555) {
+                uint32_t edgeID = std::distance(headBeginning, j);
+                std::cout << "Edge from " << i << " to " << neighbor << " with upward weight " << Gnew->getUpwardWeight(edgeID) << " and parent: " << Gnew->parentOf(i) << std::endl;
+            }
+        }
+    }
 }
 
 void DistancePreprocessing::selectNodesWithHighestID(uint32_t numberOfNodesToSelect) {
@@ -259,18 +493,23 @@ void DistancePreprocessing::selectNodesWithHighestWeightedInDegree(uint32_t numb
         }
     }
 
+    // TODO: delete nodeIDsOnly vector
+    std::vector<bool> isInTopNodes(G->numVertices(), false);
     std::sort(size.begin(), size.end(), predDescSecondElement);
     std::vector<uint32_t> nodeIDsOnly(numberOfNodesToSelect);
     for (uint32_t i = 0; i < numberOfNodesToSelect; i++) {
         nodeIDsOnly[i] = std::get<0>(size[i]);
+        isInTopNodes[nodeIDsOnly[i]] = true;
     }
     std::sort(nodeIDsOnly.begin(), nodeIDsOnly.end(), std::greater<uint32_t>());
     // print nodeIDsOnly for debugging
+    /*
     std::cout << "Node IDs with highest weighted in-degree: ";
     for (uint32_t id : nodeIDsOnly) {
         std::cout << id << ", ";
     }
     std::cout << std::endl;
+    */
 
     // TODO store the ID of the last found to shorten the search range in lower_bound? Stuff is commented out with: THIS:
 
@@ -284,13 +523,21 @@ void DistancePreprocessing::selectNodesWithHighestWeightedInDegree(uint32_t numb
         }
         precomputedNodes[node] = precomputedNodes[G->parentOf(node)];
         //THIS: indexLastInsertedNode[node] = indexLastInsertedNode[G->parentOf(node)];
-        if (precomputedNodes[node].size() == numberOfNodesToSelect) continue;
-        auto it = std::lower_bound(nodeIDsOnly.begin() //THIS: + indexLastInsertedNode[node]
-            , nodeIDsOnly.end(), G->parentOf(node), std::greater<uint32_t>());
-        if (it != nodeIDsOnly.end() && *it == G->parentOf(node)) {
-            precomputedNodes[node].push_back(*it);
-            // THIS: uint32_t id = std::distance(nodeIDsOnly.begin(), it);
-            // THIS: indexLastInsertedNode[node] = id;
+        if (isInTopNodes[G->parentOf(node)]) {
+            precomputedNodes[node].push_back(G->parentOf(node));
+        }
+    }
+
+    return;
+
+    for (uint32_t i = 0; i < G->numVertices(); i++) {
+        auto headBeginning = G->beginNeighborhood(0);
+        for (auto j = G->beginNeighborhood(i); j != G->endNeighborhood(i); j++) {
+            uint32_t neighbor = *j;
+            if (neighbor == 16945555) {
+                uint32_t edgeID = std::distance(headBeginning, j);
+                std::cout << "Edge from " << i << " to " << neighbor << " with upward weight " << G->getUpwardWeight(edgeID) << " and parent: " << G->parentOf(i) << std::endl;
+            }
         }
     }
 
@@ -322,4 +569,20 @@ void DistancePreprocessing::selectNodesWithHighestWeightedInDegree(uint32_t numb
         std::cout << pn << ", ";
     }
     std::cout << std::endl;
+    std::cout << std::endl;
+
+    /*
+    for (uint32_t i = 0; i < G->numVertices(); i++) {
+        auto headBeginning = G->beginNeighborhood(0);
+        for (auto j = G->beginNeighborhood(i); j != G->endNeighborhood(i); j++) {
+            uint32_t neighbor = *j;
+            if (neighbor == 16945555) {
+                uint32_t edgeID = std::distance(headBeginning, j);
+                std::cout << "Edge from " << i << " to " << neighbor << " with upward weight " << G->getUpwardWeight(edgeID) << " and parent: " << G->parentOf(i) << std::endl;
+            }
+        }
+    }
+    std::cout << std::endl;
+    */
+
 }

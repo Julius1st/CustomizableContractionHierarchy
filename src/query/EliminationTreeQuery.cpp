@@ -93,7 +93,7 @@ uint32_t EliminationTreeQuery::initializeDistances(uint32_t s, uint32_t t) {
             if (precNodesIndex < G->precomputedNodes[currentVertex].size() && G->precomputedNodes[currentVertex][precNodesIndex] == G->precomputedNodes[s][sIndex]) {
                 if (precNodesIndex >= G->successorUp[currentVertex].size()) std::cout << "precNodesIndex up out of bounds!" << std::endl;
                 if (G->successorUp[currentVertex][precNodesIndex] >= G->numVertices()) {
-                    std::cout << "successorUp out of bounds! " << G->successorUp[currentVertex][precNodesIndex] << " currentVertex: " << currentVertex << std::endl;
+                    // std::cout << "successorUp out of bounds! " << G->successorUp[currentVertex][precNodesIndex] << " currentVertex: " << currentVertex << std::endl;
                     break;
                 }
                 predecessorUp[G->successorUp[currentVertex][precNodesIndex]] = currentVertex;
@@ -119,7 +119,7 @@ uint32_t EliminationTreeQuery::initializeDistances(uint32_t s, uint32_t t) {
             if (precNodesIndex < G->precomputedNodes[currentVertex].size() && G->precomputedNodes[currentVertex][precNodesIndex] == G->precomputedNodes[t][tIndex]) {
                 if (precNodesIndex >= G->successorDown[currentVertex].size()) std::cout << "precNodesIndex down out of bounds!" << std::endl;
                 if (G->successorDown[currentVertex][precNodesIndex] >= G->numVertices()) {
-                    std::cout << "successorDown out of bounds! " << G->successorDown[currentVertex][precNodesIndex] << " currentVertex: " << currentVertex << std::endl;
+                    // std::cout << "successorDown out of bounds! " << G->successorDown[currentVertex][precNodesIndex] << " currentVertex: " << currentVertex << std::endl;
                     break;
                 }
                 predecessorDown[G->successorDown[currentVertex][precNodesIndex]] = currentVertex;

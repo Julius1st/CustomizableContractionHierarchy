@@ -40,13 +40,15 @@ public:
     void printEliminationTreeInformationOfNewGraph();
     Graph* getGplus() const { return Gplus.get(); }
 
+    std::unique_ptr<ContractionBuilder> builder;
+
 private:
     Graph* G;
     std::unique_ptr<Graph> Gplus;
 
     std::vector<uint32_t> rankOrder;
 
-    std::unique_ptr<ContractionBuilder> builder;
+
     std::unique_ptr<BasicCustomizer> basicCustomizer;
     std::unique_ptr<EliminationTreeQuery> queryEngine;
     std::unique_ptr<EliminationTreeQuery> distancePreprocessedQueryEngine;

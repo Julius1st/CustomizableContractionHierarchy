@@ -101,8 +101,38 @@ void cleanInputData(vector<uint32_t>& in_first_out,
 
 uint32_t dijkstra(uint32_t s, uint32_t t, vector<vector<DirectedEdge>> adj, vector<uint32_t>& predecessor, vector<uint32_t>& hop_count) {
     uint32_t n = adj.size();
-    uint32_t infinity = 0xFFFFFFFF/2 -1;
-    vector<uint32_t> dist(n, infinity);
+    vector<uint32_t> dist(n, Graph::INFINITY_VALUE);
+    dist[s] = 0;
+    hop_count[s] = 0;
+    priority_queue<pair<uint32_t, uint32_t>, vector<pair<uint32_t, uint32_t>>, greater<pair<uint32_t, uint32_t>> > pq;
+
+    pq.push({0, s});
+    while (!pq.empty()) {
+        uint32_t u = pq.top().second;
+        pq.pop();
+
+        if (u == t) return dist[t];
+
+        for (auto it = adj[u].begin(); it != adj[u].end(); it++) {
+            uint32_t v = it->b;
+            uint32_t weight = it->weight;
+            if (dist[v] > dist[u] + weight) {
+                dist[v] = dist[u] + weight;
+                predecessor[v] = u;
+                hop_count[v] = hop_count[u] + 1;
+                pq.push({dist[v], v});
+            }
+        }
+    }
+
+    return dist[t];
+}
+
+uint32_t dijkstra_order(uint32_t s, uint32_t t, vector<vector<DirectedEdge>> adj, vector<uint32_t>& predecessor, vector<uint32_t>& hop_count, vector<uint32_t>& order) {
+    s = order[s];
+    t = order[t];
+    uint32_t n = adj.size();
+    vector<uint32_t> dist(n, Graph::INFINITY_VALUE);
     dist[s] = 0;
     hop_count[s] = 0;
     priority_queue<pair<uint32_t, uint32_t>, vector<pair<uint32_t, uint32_t>>, greater<pair<uint32_t, uint32_t>> > pq;
@@ -204,6 +234,8 @@ int main(int argc, char *argv[]) {
         vector<uint32_t> clean_downward_weight;
         vector<vector<DirectedEdge>> adj; // only used for Dijkstra, may be discarded when only querying CCH
         adj.resize(node_count);
+        vector<uint32_t> predecessor(node_count, Graph::INFINITY_VALUE);
+        vector<uint32_t> hop_count(node_count, 0);
 
         cleanInputData(first_out, head, weight, clean_first_out, clean_head, clean_upward_weight, clean_downward_weight, adj);
 
@@ -211,7 +243,7 @@ int main(int argc, char *argv[]) {
         first_out.clear();
         head.clear();
         weight.clear();
-        adj.clear();
+        // adj.clear();
 
         auto G = make_unique<Graph>(clean_first_out, clean_head, clean_upward_weight, clean_downward_weight);
 
@@ -220,15 +252,51 @@ int main(int argc, char *argv[]) {
         //order = {0, 1, 2, 3, 4, 5, 6, 7};
         //node_count = G->numVertices();
 
+        /*
+        // second test graph:
+        vector<uint32_t> first_out_test = {0, 2, 3, 4, 5, 6, 6};
+        vector<uint32_t> head_test = {1, 3, 2, 5, 4, 5};
+        vector<uint32_t> upward_weight_test = {1, 1, 1, Graph::INFINITY_VALUE, 1, 1};
+        vector<uint32_t> downward_weight_test = {1, 1, 1, 1, 1, 1};
+        order = {0, 1, 3, 2, 4, 5};
+        node_count = 6;
+        G = make_unique<Graph>(first_out_test, head_test, upward_weight_test, downward_weight_test);
+
+
+        // third test graph:
+        vector<uint32_t> first_out_test = {0, 2, 3, 4, 5, 6, 6};
+        vector<uint32_t> head_test = {1, 2, 5, 3, 4, 5};
+        vector<uint32_t> upward_weight_test = {1, 1, Graph::INFINITY_VALUE, 1, 1, 1};
+        vector<uint32_t> downward_weight_test = {1, 1, 1, 1, 1, 1};
+        order = {0, 1, 2, 3, 4, 5};
+        node_count = 6;
+        G = make_unique<Graph>(first_out_test, head_test, upward_weight_test, downward_weight_test);
+        */
+
         //CCH* cch = new CCH(G.get(), order);
         auto cch = make_unique<CCH>(G.get(), order);
         cout << "Preprocessing Graph ... " << flush;
         cch->preprocess();
         cout << "done" << endl;
 
+        /*
+        uint32_t current_start = 15222033;
+        std::cout << "Dijkstra Query: " << dijkstra_order(current_start, 15222035, adj, predecessor, hop_count, order) << std::endl;
+        uint32_t vertex = order[15222035];
+        while (vertex != order[current_start]) {
+            uint32_t pred = predecessor[vertex];
+            cout << "Predecessor of " << cch->builder->getRank(vertex) << " is " << cch->builder->getRank(pred) << endl;
+            vertex = pred;
+        }
+        */
+
         cout << "Customizing Graph ... " << flush;
         cch->customize();
         cout << "done" << endl;
+
+        //std::cout << "Normal CCH query result: " << cch->query(order[current_start], order[15222035]) << std::endl;
+        //cch->preprocessDistances(20);
+        //std::cout << "Distance Preprocessed CCH query result (no preprocessing): " << cch->queryWithDistancePreprocessing(order[current_start], order[15222035]) << std::endl;
 
         // some random queries from which the average query runtime is computed
         int num_queries = 10000;
