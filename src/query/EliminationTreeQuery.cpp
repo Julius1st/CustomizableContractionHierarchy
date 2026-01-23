@@ -12,7 +12,6 @@ EliminationTreeQuery::EliminationTreeQuery(Graph *g) : G(g){
 }
 
 uint32_t EliminationTreeQuery::query(uint32_t s, uint32_t t) {
-    //std::cout << "EliminationTreeQuery from " << s << " to " << t << " with parents " << G->parentOf(s) << " and " << G->parentOf(t) << std::endl;
     distUp[s] = 0;
     distDown[t] = 0;
 
@@ -23,7 +22,6 @@ uint32_t EliminationTreeQuery::query(uint32_t s, uint32_t t) {
     initTime += std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
     initializedFields += G->precomputedNodes[s].size() + G->precomputedNodes[t].size();
 
-    //std::cout << "Test 1" << std::endl;
     // Original Algorithm
     while (s != t) {
         if (s < t) {
@@ -34,7 +32,6 @@ uint32_t EliminationTreeQuery::query(uint32_t s, uint32_t t) {
             t = G->parentOf(t);
         }
     }
-    //std::cout << "Test 2" << std::endl;
 
     uint32_t u = s;
 
@@ -84,7 +81,6 @@ uint32_t EliminationTreeQuery::initializeDistances(uint32_t s, uint32_t t) {
     uint32_t d = Graph::INFINITY_VALUE;
 
     for (uint32_t sIndex = 0; sIndex < G->precomputedNodes[s].size(); sIndex++) {
-        //if (G->precomputedDistancesUp[s][sIndex] >= Graph::INFINITY_VALUE) continue;
         uint32_t precNodesIndex = sIndex;
         distUp[G->precomputedNodes[s][sIndex]] = G->precomputedDistancesUp[s][sIndex];
         uint32_t currentVertex = s;
@@ -108,9 +104,7 @@ uint32_t EliminationTreeQuery::initializeDistances(uint32_t s, uint32_t t) {
         }
     }
 
-    //std::cout << "Test 3" << std::endl;
     for (uint32_t tIndex = 0; tIndex < G->precomputedNodes[t].size(); tIndex++) {
-        //if (G->precomputedDistancesDown[t][tIndex] >= Graph::INFINITY_VALUE) continue;
         uint32_t precNodesIndex = tIndex;
         distDown[G->precomputedNodes[t][tIndex]] = G->precomputedDistancesDown[t][tIndex];
         uint32_t currentVertex = t;

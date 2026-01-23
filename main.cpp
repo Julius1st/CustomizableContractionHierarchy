@@ -322,7 +322,7 @@ int main(int argc, char *argv[]) {
         vector<uint64_t> relaxedEdgesNormal;
         vector<uint64_t> relaxedEdgesPreprocessed;
 
-        for (int param = 0; param <= preprocessingParameter; param+=10) {
+        for (int param = 0; param <= preprocessingParameter; param+=50) {
             cout << "----------------------------------------" << endl;
             cout << "Preprocessing Distances with parameter " << param << " ... " << std::endl << flush;
             cch->preprocessDistances(param);

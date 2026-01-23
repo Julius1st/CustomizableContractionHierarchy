@@ -2,7 +2,6 @@
 // Created by Julius on 26.09.2025.
 //
 #include "CCH.hpp"
-#include <iostream>
 
 CCH::CCH(Graph* baseGraph, std::vector<uint32_t> &order) : G(baseGraph), rankOrder(order) {
     builder = std::make_unique<ContractionBuilder>(G, rankOrder);
@@ -11,26 +10,6 @@ CCH::CCH(Graph* baseGraph, std::vector<uint32_t> &order) : G(baseGraph), rankOrd
 void CCH::preprocess() {
     Gplus = builder->buildGplus();
     basicCustomizer = std::make_unique<BasicCustomizer>(Gplus.get());
-/*
-    std::cout << "lower Neighbors of node 15212270:" << std::endl;
-    auto headBeginning = Gplus->beginNeighborhood(0);
-    for (uint32_t i = 0; i < Gplus->numVertices(); i++) {
-        for (auto j = Gplus->beginNeighborhood(i); j != Gplus->endNeighborhood(i); j++) {
-            uint32_t neighbor = *j;
-            if (neighbor == 15212270) {
-                uint32_t edgeID = std::distance(headBeginning, j);
-                std::cout << "Edge from " << i << " to " << neighbor << " with upward weight " << Gplus->getUpwardWeight(edgeID) << " and parent: " << Gplus->parentOf(i) << std::endl;
-            }
-        }
-    }
-    std::cout << "upper Neighbors of node 15212270:" << std::endl;
-    for (auto j = Gplus->beginNeighborhood(15212270); j != Gplus->endNeighborhood(15212270); j++) {
-        uint32_t neighbor = *j;
-        uint32_t edgeID = std::distance(headBeginning, j);
-        std::cout << "Edge from " << 15212270 << " to " << neighbor << " with upward weight " << Gplus->getUpwardWeight(edgeID) << " and parent: " << Gplus->parentOf(neighbor) << std::endl;
-
-    }
-    */
 }
 
 void CCH::customize() {

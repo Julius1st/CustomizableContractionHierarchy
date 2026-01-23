@@ -33,7 +33,7 @@ void ContractionBuilder::permuteNodeIDs() {
             uint32_t downWeight = G->getDownwardWeight(std::distance(G->beginNeighborhood(0), it));
 
             // should not happen:
-            if (oldU >= oldV) throw std::invalid_argument("permuteNodeIDs: duplicate or self loop discovered");
+            if (oldU >= oldV) throw std::invalid_argument("permuteNodeIDs: duplicate or self loop or edge in wrong direction discovered");
 
             // Map to new IDs
             uint32_t newU = rank[oldU];
