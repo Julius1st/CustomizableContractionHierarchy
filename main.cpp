@@ -188,17 +188,19 @@ int main(int argc, char *argv[]) {
         string ch_forward_weight;
         string ch_backward_weight;
 
-        uint32_t preprocessingParameter; // The parameter used for distance precomputation in the distance-preprocessed CCH queries
+        uint32_t maxPreprocessingParameter; // The parameter used for distance precomputation in the distance-preprocessed CCH queries
+        uint32_t preprocessingStepSize; // The step size for the parameter increase when running multiple preprocessings in a row
 
-        if (argc != 6) {
-            cerr << argv[0] << " graph_first_out graph_head graph_weight ch_order preprocessing_parameter" << endl;
+        if (argc != 7) {
+            cerr << argv[0] << " graph_first_out graph_head graph_weight ch_order max_preprocessing_parameter preprocessing_parameter_step_size" << endl;
             return 1;
         } else {
             graph_first_out = argv[1];
             graph_head = argv[2];
             graph_weight = argv[3];
             ch_order = argv[4];
-            preprocessingParameter = stoi(argv[5]);
+            maxPreprocessingParameter = stoi(argv[5]);
+            preprocessingStepSize = stoi(argv[6]);
         }
 
 
@@ -322,7 +324,7 @@ int main(int argc, char *argv[]) {
         vector<uint64_t> relaxedEdgesNormal;
         vector<uint64_t> relaxedEdgesPreprocessed;
 
-        for (int param = 0; param <= preprocessingParameter; param+=50) {
+        for (int param = 0; param <= maxPreprocessingParameter; param+=preprocessingStepSize) {
             cout << "----------------------------------------" << endl;
             cout << "Preprocessing Distances with parameter " << param << " ... " << std::endl << flush;
             cch->preprocessDistances(param);
