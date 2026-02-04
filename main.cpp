@@ -281,24 +281,9 @@ int main(int argc, char *argv[]) {
         cch->preprocess();
         cout << "done" << endl;
 
-        /*
-        uint32_t current_start = 15222033;
-        std::cout << "Dijkstra Query: " << dijkstra_order(current_start, 15222035, adj, predecessor, hop_count, order) << std::endl;
-        uint32_t vertex = order[15222035];
-        while (vertex != order[current_start]) {
-            uint32_t pred = predecessor[vertex];
-            cout << "Predecessor of " << cch->builder->getRank(vertex) << " is " << cch->builder->getRank(pred) << endl;
-            vertex = pred;
-        }
-        */
-
         cout << "Customizing Graph ... " << flush;
         cch->customize();
         cout << "done" << endl;
-
-        //std::cout << "Normal CCH query result: " << cch->query(order[current_start], order[15222035]) << std::endl;
-        //cch->preprocessDistances(20);
-        //std::cout << "Distance Preprocessed CCH query result (no preprocessing): " << cch->queryWithDistancePreprocessing(order[current_start], order[15222035]) << std::endl;
 
         // some random queries from which the average query runtime is computed
         int num_queries = 10000;

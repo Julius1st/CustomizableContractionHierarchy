@@ -38,7 +38,6 @@ void DistancePreprocessing::precomputeDistances(uint32_t preprocessingParameter)
     const auto headStart = G->beginNeighborhood(0);
 
     // TODO: Different options for selecting nodes for distance precomputation via program parameter
-    // selectNodesWithHighestID(100);
     // selectNodesWithMaxDistanceToRoot(preprocessingParameter);
     selectNodesWithHighestWeightedInDegree(preprocessingParameter);
 
@@ -133,8 +132,6 @@ void DistancePreprocessing::createGraphWithPrecomputedDistances() {
     for (uint32_t node = 0; node < numVertices; node++) {
 
         int64_t precomputedNodesID = precomputedNodes[node].size()-1;
-        // TODO replace added edges with overall added edges
-        uint32_t addedEdges = 0;
 
         auto it = G->beginNeighborhood(node);
         while (it != G->endNeighborhood(node)) {
@@ -145,7 +142,6 @@ void DistancePreprocessing::createGraphWithPrecomputedDistances() {
                 newHead[overallAddedEdges] = neighbor;
                 newUpwardWeights[overallAddedEdges] = G->getUpwardWeight(std::distance(headStart, it));
                 newDownwardWeights[overallAddedEdges] = G->getDownwardWeight(std::distance(headStart, it));
-                addedEdges++;
                 overallAddedEdges++;
                 it++;
             }
@@ -157,7 +153,7 @@ void DistancePreprocessing::createGraphWithPrecomputedDistances() {
                 precomputedNodesID--;
             }
         }
-        newFirstOut[node +1] = newFirstOut[node] + addedEdges;
+        newFirstOut[node +1] = overallAddedEdges;
     }
     newHead.resize(overallAddedEdges);
     newUpwardWeights.resize(overallAddedEdges);
@@ -165,17 +161,6 @@ void DistancePreprocessing::createGraphWithPrecomputedDistances() {
 
     Gnew = std::make_unique<Graph>(newFirstOut, newHead, newUpwardWeights, newDownwardWeights, eliminationTree,
                      precomputedNodes, precomputedDistancesUp, precomputedDistancesDown, successorUp, successorDown);
-}
-
-void DistancePreprocessing::selectNodesWithHighestID(uint32_t numberOfNodesToSelect) {
-    for (uint32_t node = G->numVertices(); node-- > 0;) {
-        if (G->parentOf(node) == Graph::INFINITY_VALUE) {
-            precomputedNodes[node] = std::vector<uint32_t>();
-            continue;
-        }
-        precomputedNodes[node] = precomputedNodes[G->parentOf(node)];
-        if (G->parentOf(node) > G->numVertices() - numberOfNodesToSelect) precomputedNodes[node].push_back(G->parentOf(node));
-    }
 }
 
 void DistancePreprocessing::selectNodesWithMaxDistanceToRoot(uint32_t maxDistance) {
@@ -189,16 +174,6 @@ void DistancePreprocessing::selectNodesWithMaxDistanceToRoot(uint32_t maxDistanc
     }
 }
 
-//TODO: delete this:
-
-// This function inserts item into vec such that vec remains sorted according to pred
-template< typename T, typename Pred >
-typename std::vector<T>::iterator insert_sorted( std::vector<T> & vec, T const& item, Pred pred ) {
-    return vec.insert(
-           std::lower_bound( vec.begin(), vec.end(), item, pred ),
-           item
-        );
-}
 // Predicate for sorting tuples based on the second element in descending order
 auto predDescSecondElement = [](const std::tuple<uint32_t, uint32_t>& a, const std::tuple<uint32_t, uint32_t>& b) {
     return std::get<1>(a) > std::get<1>(b);
