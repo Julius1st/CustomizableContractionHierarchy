@@ -17,10 +17,10 @@ void CCH::customize() {
     queryEngine = std::make_unique<EliminationTreeQuery>(Gplus.get());
 }
 
-void CCH::preprocessDistances(uint32_t preprocessingParameter) {
+void CCH::preprocessDistances(uint32_t preprocessingParameter, uint32_t choiceScheme) {
     GwithPrecomputedDistances.reset();
     distancePreprocessing = std::make_unique<DistancePreprocessing>(Gplus.get());
-    GwithPrecomputedDistances = distancePreprocessing->run(preprocessingParameter);
+    GwithPrecomputedDistances = distancePreprocessing->run(preprocessingParameter, choiceScheme);
     distancePreprocessedQueryEngine = std::make_unique<EliminationTreeQuery>(GwithPrecomputedDistances.get());
 }
 

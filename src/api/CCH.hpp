@@ -18,7 +18,7 @@ public:
 
     void preprocess();
     void customize();
-    void preprocessDistances(uint32_t preprocessingParameter);
+    void preprocessDistances(uint32_t preprocessingParameter, uint32_t choiceScheme);
     uint32_t query(uint32_t s, uint32_t t);
     uint32_t queryWithDistancePreprocessing(uint32_t s, uint32_t t);
 
@@ -33,6 +33,9 @@ public:
     void resetRelaxedEdgesCounters() {
         queryEngine->relaxedEdges = 0;
         distancePreprocessedQueryEngine->relaxedEdges = 0;
+    }
+    uint64_t getSizeOfPrecomputedData() const {
+        return distancePreprocessing->getSizeOfPrecomputedData();
     }
 
     //For testing:

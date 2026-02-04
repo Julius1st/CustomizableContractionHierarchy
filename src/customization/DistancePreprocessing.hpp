@@ -11,11 +11,18 @@ class DistancePreprocessing {
 public:
     explicit DistancePreprocessing(Graph* graph);
 
-    std::unique_ptr<Graph> run(uint32_t preprocessingParameter);
+    std::unique_ptr<Graph> run(uint32_t preprocessingParameter, uint32_t choiceScheme);
 
     uint32_t getNumDeletedEdges() const { return numDeletedEdges; }
     long getProcessingTime() const { return processingTime; }
     long getGraphCreationTime() const { return graphCreationTime; }
+    uint64_t getSizeOfPrecomputedData() const {
+        uint64_t size = 0;
+        for (uint32_t i = 0; i < G->numVertices(); i++) {
+            size += precomputedNodes[i].size() * 5; //nodes, distances up, distances down, successors up, successors down
+        }
+        return size;
+    }
 
 private:
     Graph* G;
@@ -36,7 +43,7 @@ private:
     long graphCreationTime = 0;
     uint32_t numDeletedEdges = 0;
 
-    void precomputeDistances(uint32_t preprocessingParameter);
+    void precomputeDistances(uint32_t preprocessingParameter, uint32_t choiceScheme);
     void createGraphWithPrecomputedDistances();
 
     // Different options for Vertex selection for distance precomputation

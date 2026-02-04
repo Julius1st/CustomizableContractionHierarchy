@@ -4,6 +4,7 @@
 #include <queue>
 #include <random>
 #include <memory>
+#include <fstream>
 #include "CCH.hpp"
 #include "VectorIO.h"
 
@@ -188,19 +189,26 @@ int main(int argc, char *argv[]) {
         string ch_forward_weight;
         string ch_backward_weight;
 
-        uint32_t maxPreprocessingParameter; // The parameter used for distance precomputation in the distance-preprocessed CCH queries
-        uint32_t preprocessingStepSize; // The step size for the parameter increase when running multiple preprocessings in a row
+        // For max distance to root choice scheme (number 0)
+        uint32_t maxPreprocessingParameter_0; // The parameter used for distance precomputation in the distance-preprocessed CCH queries
+        uint32_t preprocessingStepSize_0; // The step size for the parameter increase when running multiple preprocessings in a row
 
-        if (argc != 7) {
-            cerr << argv[0] << " graph_first_out graph_head graph_weight ch_order max_preprocessing_parameter preprocessing_parameter_step_size" << endl;
+        // For highest weighted in-degree choice scheme (number 1)
+        uint32_t maxPreprocessingParameter_1; // The parameter used for distance precomputation in the distance-preprocessed CCH queries
+        uint32_t preprocessingStepSize_1; // The step size for the parameter increase when running multiple preprocessings in a row
+
+        if (argc != 9) {
+            cerr << argv[0] << " graph_first_out graph_head graph_weight ch_order max_preprocessing_parameter_0 preprocessing_parameter_step_size_0 max_preprocessing_parameter_1 preprocessing_parameter_step_size_1" << endl;
             return 1;
         } else {
             graph_first_out = argv[1];
             graph_head = argv[2];
             graph_weight = argv[3];
             ch_order = argv[4];
-            maxPreprocessingParameter = stoi(argv[5]);
-            preprocessingStepSize = stoi(argv[6]);
+            maxPreprocessingParameter_0 = stoi(argv[5]);
+            preprocessingStepSize_0 = stoi(argv[6]);
+            maxPreprocessingParameter_1 = stoi(argv[7]);
+            preprocessingStepSize_1 = stoi(argv[8]);
         }
 
 
@@ -285,6 +293,8 @@ int main(int argc, char *argv[]) {
         cch->customize();
         cout << "done" << endl;
 
+        int num_repetitions = 10; // number of repetitions for each preprocessing parameter to get a more stable average query time
+
         // some random queries from which the average query runtime is computed
         int num_queries = 10000;
         std::mt19937 mt{};
@@ -300,104 +310,264 @@ int main(int argc, char *argv[]) {
         }
 
         vector<uint32_t> preprocessing_distances;
-        vector<long> normal_query_times;
-        vector<long> preproc_query_times;
-        vector<uint32_t> initialized_fields;
-        vector<uint32_t> num_deleted_edges;
-        vector<long> distance_preprocessing_times;
-        vector<long> graph_creation_times;
-        vector<uint64_t> relaxedEdgesNormal;
-        vector<uint64_t> relaxedEdgesPreprocessed;
+        vector<long> avg_normal_query_times;
+        vector<long> avg_preproc_query_times;
+        vector<uint32_t> avg_initialized_fields;
+        vector<uint32_t> avg_num_deleted_edges;
+        vector<long> avg_distance_preprocessing_times;
+        vector<long> avg_graph_creation_times;
+        vector<uint64_t> avg_relaxedEdgesNormal;
+        vector<uint64_t> avg_relaxedEdgesPreprocessed;
+        vector<uint64_t> size_of_precomputed_data; // in number of uint32 fields
 
-        for (int param = 0; param <= maxPreprocessingParameter; param+=preprocessingStepSize) {
-            cout << "----------------------------------------" << endl;
-            cout << "Preprocessing Distances with parameter " << param << " ... " << std::endl << flush;
-            cch->preprocessDistances(param);
-            cout << "Querying distances ... " << endl << flush;
+        // For choice scheme max distance to root (number 0)
+        for (int param = 0; param <= maxPreprocessingParameter_0; param+=preprocessingStepSize_0) {
 
-            cch->resetRelaxedEdgesCounters();
-            vector<uint32_t> norm_results(num_queries);
-            vector<uint32_t> preproc_results(num_queries);
+            vector<long> normal_query_times(num_repetitions);
+            vector<long> preproc_query_times(num_repetitions);
+            vector<uint32_t> initialized_fields(num_repetitions);
+            vector<uint32_t> num_deleted_edges(num_repetitions);
+            vector<long> distance_preprocessing_times(num_repetitions);
+            vector<long> graph_creation_times(num_repetitions);
+            vector<uint64_t> relaxedEdgesNormal(num_repetitions);
+            vector<uint64_t> relaxedEdgesPreprocessed(num_repetitions);
 
-            long norm_time;
-            long preproc_time;
-            std::chrono::steady_clock::time_point begin;
-            std::chrono::steady_clock::time_point end;
+            for (int r = 0; r < num_repetitions; r++) {
 
-            begin = std::chrono::steady_clock::now();
-            for (uint32_t i = 0; i < s_vector.size(); i++) {
-                uint32_t s = s_vector[i];
-                uint32_t t = t_vector[i];
-                norm_results[i] = cch->query(s, t);
-            }
-            end = std::chrono::steady_clock::now();
-            norm_time = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
+                cout << "----------------------------------------" << endl;
+                cout << "Preprocessing Distances with parameter " << param << " ... " << std::endl << flush;
+                cch->preprocessDistances(param, 0);
+                cout << "Querying distances ... " << endl << flush;
 
-            begin = std::chrono::steady_clock::now();
-            for (uint32_t i = 0; i < s_vector.size(); i++) {
-                uint32_t s = s_vector[i];
-                uint32_t t = t_vector[i];
-                preproc_results[i] = cch->queryWithDistancePreprocessing(s, t);
-            }
-            end = std::chrono::steady_clock::now();
-            preproc_time = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
+                cch->resetRelaxedEdgesCounters();
+                vector<uint32_t> norm_results(num_queries);
+                vector<uint32_t> preproc_results(num_queries);
 
-            for (uint32_t i = 0; i < norm_results.size(); i++) {
-                if(norm_results[i] != preproc_results[i]) {
-                    cout << "Distances from CCH query and distance-preprocessed CCH query do not match. Distance from normal query: "
-                                        + std::to_string(norm_results[i]) + ", distance from distance-preprocessed query: "
-                                        + std::to_string(preproc_results[i]) + " for query from "
-                                        + std::to_string(s_vector[i]) + " to " + std::to_string(t_vector[i]) + ". This was query number: " + std::to_string(i) << endl;
+                long norm_time;
+                long preproc_time;
+                std::chrono::steady_clock::time_point begin;
+                std::chrono::steady_clock::time_point end;
+
+                begin = std::chrono::steady_clock::now();
+                for (uint32_t i = 0; i < s_vector.size(); i++) {
+                    uint32_t s = s_vector[i];
+                    uint32_t t = t_vector[i];
+                    norm_results[i] = cch->query(s, t);
                 }
+                end = std::chrono::steady_clock::now();
+                norm_time = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
+
+                begin = std::chrono::steady_clock::now();
+                for (uint32_t i = 0; i < s_vector.size(); i++) {
+                    uint32_t s = s_vector[i];
+                    uint32_t t = t_vector[i];
+                    preproc_results[i] = cch->queryWithDistancePreprocessing(s, t);
+                }
+                end = std::chrono::steady_clock::now();
+                preproc_time = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
+
+                for (uint32_t i = 0; i < norm_results.size(); i++) {
+                    if(norm_results[i] != preproc_results[i]) {
+                        cout << "Distances from CCH query and distance-preprocessed CCH query do not match. Distance from normal query: "
+                                            + std::to_string(norm_results[i]) + ", distance from distance-preprocessed query: "
+                                            + std::to_string(preproc_results[i]) + " for query from "
+                                            + std::to_string(s_vector[i]) + " to " + std::to_string(t_vector[i]) + ". This was query number: " + std::to_string(i) << endl;
+                    }
+                }
+
+                cout << "time in microseconds (normal query): " << norm_time << " average per query: " << norm_time / num_queries << endl;
+                cout << "Query init time in microseconds (avg): " << cch->getInitTimeNormalEngine() / num_queries << endl;
+                cout << "time in microseconds (distance-preprocessed query): " << preproc_time << " average per query: " << preproc_time / num_queries << endl;
+                cout << "Query init time in microseconds (avg): " << cch->getInitTimePreprocessedEngine() / num_queries << endl;
+                cout << "Initialized fields (avg): " << cch->getInitializedFields() / num_queries << endl;
+
+                normal_query_times[r] = norm_time / num_queries;
+                preproc_query_times[r] = preproc_time / num_queries;
+                initialized_fields[r] = cch->getInitializedFields() / num_queries;
+                num_deleted_edges[r] = cch->getNumDeletedEdges();
+                distance_preprocessing_times[r] = cch->getDistancePreprocessingTime();
+                graph_creation_times[r] = cch->getGraphCreationTime();
+                relaxedEdgesNormal[r] = cch->getRelaxedEdgesNormalEngine() / num_queries;
+                relaxedEdgesPreprocessed[r] = cch->getRelaxedEdgesPreprocessedEngine() / num_queries;
             }
 
-            cout << "time in microseconds (normal query): " << norm_time << " average per query: " << norm_time / num_queries << endl;
-            cout << "Query init time in microseconds (avg): " << cch->getInitTimeNormalEngine() / num_queries << endl;
-            cout << "time in microseconds (distance-preprocessed query): " << preproc_time << " average per query: " << preproc_time / num_queries << endl;
-            cout << "Query init time in microseconds (avg): " << cch->getInitTimePreprocessedEngine() / num_queries << endl;
-            cout << "Initialized fields (avg): " << cch->getInitializedFields() / num_queries << endl;
-
+            // compute averages over repetitions
             preprocessing_distances.push_back(param);
-            normal_query_times.push_back(norm_time/num_queries);
-            preproc_query_times.push_back(preproc_time/num_queries);
-            initialized_fields.push_back(cch->getInitializedFields() / num_queries);
-            num_deleted_edges.push_back(cch->getNumDeletedEdges());
-            distance_preprocessing_times.push_back(cch->getDistancePreprocessingTime());
-            graph_creation_times.push_back(cch->getGraphCreationTime());
-            relaxedEdgesNormal.push_back(cch->getRelaxedEdgesNormalEngine() / num_queries);
-            relaxedEdgesPreprocessed.push_back(cch->getRelaxedEdgesPreprocessedEngine() / num_queries);
+            avg_normal_query_times.push_back(std::reduce(normal_query_times.begin(), normal_query_times.end()) / num_repetitions);
+            avg_preproc_query_times.push_back(std::reduce(preproc_query_times.begin(), preproc_query_times.end()) / num_repetitions);
+            avg_initialized_fields.push_back(std::reduce(initialized_fields.begin(), initialized_fields.end()) / num_repetitions);
+            avg_num_deleted_edges.push_back(std::reduce(num_deleted_edges.begin(), num_deleted_edges.end()) / num_repetitions);
+            avg_distance_preprocessing_times.push_back(std::reduce(distance_preprocessing_times.begin(), distance_preprocessing_times.end()) / num_repetitions);
+            avg_graph_creation_times.push_back(std::reduce(graph_creation_times.begin(), graph_creation_times.end()) / num_repetitions);
+            avg_relaxedEdgesNormal.push_back(std::reduce(relaxedEdgesNormal.begin(), relaxedEdgesNormal.end()) / num_repetitions);
+            avg_relaxedEdgesPreprocessed.push_back(std::reduce(relaxedEdgesPreprocessed.begin(), relaxedEdgesPreprocessed.end()) / num_repetitions);
+            size_of_precomputed_data.push_back(cch->getSizeOfPrecomputedData());
         }
 
-        cout << "All tests done." << endl;
-        // Print summary arrays for further evaluation
-        cout << "----------------------------------------" << endl;
-        cout << "Preprocessing Distances Parameters: [";
-        for (auto val : preprocessing_distances) cout << val << ", ";
-        cout << "]" << endl;
-        cout << "Normal Query Times (microseconds): [";
-        for (auto val : normal_query_times) cout << val << ", ";
-        cout << "]" << endl;
-        cout << "Distance-Preprocessed Query Times (microseconds): [";
-        for (auto val : preproc_query_times) cout << val << ", ";
-        cout << "]" << endl;
-        cout << "Initialized Fields (avg): [";
-        for (auto val : initialized_fields) cout << val << ", ";
-        cout << "]" << endl;
-        cout << "Number of Deleted Edges: [";
-        for (auto val : num_deleted_edges) cout << val << ", ";
-        cout << "]" << endl;
-        cout << "Distance Preprocessing Times (milliseconds): [";
-        for (auto val : distance_preprocessing_times) cout << val << ", ";
-        cout << "]" << endl;
-        cout << "Graph Creation Times (milliseconds): [";
-        for (auto val : graph_creation_times) cout << val << ", ";
-        cout << "]" << endl;
-        cout << "Relaxed Edges Normal Engine: [";
-        for (auto val : relaxedEdgesNormal) cout << val << ", ";
-        cout << "]" << endl;
-        cout << "Relaxed Edges Preprocessed Engine: [";
-        for (auto val : relaxedEdgesPreprocessed) cout << val << ", ";
-        cout << "]" << endl;
+        // write summary to file
+        ofstream summary_file("max_dist_to_root_results.txt");
+        summary_file << "param=[";
+        for (auto val : preprocessing_distances) summary_file << val << ", ";
+        summary_file << "]" << endl;
+        summary_file << "normalQueryTimes=[";
+        for (auto val : avg_normal_query_times) summary_file << val << ", ";
+        summary_file << "]" << endl;
+        summary_file << "preprocQueryTimes=[";
+        for (auto val : avg_preproc_query_times) summary_file << val << ", ";
+        summary_file << "]" << endl;
+        summary_file << "initializedFields=[";
+        for (auto val : avg_initialized_fields) summary_file << val << ", ";
+        summary_file << "]" << endl;
+        summary_file << "numDeletedEdges=[";
+        for (auto val : avg_num_deleted_edges) summary_file << val << ", ";
+        summary_file << "]" << endl;
+        summary_file << "distancePreprocessingTimes=[";
+        for (auto val : avg_distance_preprocessing_times) summary_file << val << ", ";
+        summary_file << "]" << endl;
+        summary_file << "graphCreationTimes=[";
+        for (auto val : avg_graph_creation_times) summary_file << val << ", ";
+        summary_file << "]" << endl;
+        summary_file << "relaxedEdgesNormalEngine=[";
+        for (auto val : avg_relaxedEdgesNormal) summary_file << val << ", ";
+        summary_file << "]" << endl;
+        summary_file << "relaxedEdgesPreprocessedEngine=[";
+        for (auto val : avg_relaxedEdgesPreprocessed) summary_file << val << ", ";
+        summary_file << "]" << endl;
+        summary_file << "sizeOfPrecomputedDataByte=[";
+        for (auto val : size_of_precomputed_data) summary_file << val * 4 << ", ";
+        summary_file << "]" << endl;
+        summary_file.close();
+
+
+
+        preprocessing_distances.clear();
+        avg_normal_query_times.clear();
+        avg_preproc_query_times.clear();
+        avg_initialized_fields.clear();
+        avg_num_deleted_edges.clear();
+        avg_distance_preprocessing_times.clear();
+        avg_graph_creation_times.clear();
+        avg_relaxedEdgesNormal.clear();
+        avg_relaxedEdgesPreprocessed.clear();
+        size_of_precomputed_data.clear(); // in number of uint32 fields
+
+        // For choice scheme weighted in degree (number 1)
+        for (int param = 0; param <= maxPreprocessingParameter_1; param+=preprocessingStepSize_1) {
+
+            vector<long> normal_query_times(num_repetitions);
+            vector<long> preproc_query_times(num_repetitions);
+            vector<uint32_t> initialized_fields(num_repetitions);
+            vector<uint32_t> num_deleted_edges(num_repetitions);
+            vector<long> distance_preprocessing_times(num_repetitions);
+            vector<long> graph_creation_times(num_repetitions);
+            vector<uint64_t> relaxedEdgesNormal(num_repetitions);
+            vector<uint64_t> relaxedEdgesPreprocessed(num_repetitions);
+
+            for (int r = 0; r < num_repetitions; r++) {
+
+                cout << "----------------------------------------" << endl;
+                cout << "Preprocessing Distances with parameter " << param << " ... " << std::endl << flush;
+                cch->preprocessDistances(param, 1);
+                cout << "Querying distances ... " << endl << flush;
+
+                cch->resetRelaxedEdgesCounters();
+                vector<uint32_t> norm_results(num_queries);
+                vector<uint32_t> preproc_results(num_queries);
+
+                long norm_time;
+                long preproc_time;
+                std::chrono::steady_clock::time_point begin;
+                std::chrono::steady_clock::time_point end;
+
+                begin = std::chrono::steady_clock::now();
+                for (uint32_t i = 0; i < s_vector.size(); i++) {
+                    uint32_t s = s_vector[i];
+                    uint32_t t = t_vector[i];
+                    norm_results[i] = cch->query(s, t);
+                }
+                end = std::chrono::steady_clock::now();
+                norm_time = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
+
+                begin = std::chrono::steady_clock::now();
+                for (uint32_t i = 0; i < s_vector.size(); i++) {
+                    uint32_t s = s_vector[i];
+                    uint32_t t = t_vector[i];
+                    preproc_results[i] = cch->queryWithDistancePreprocessing(s, t);
+                }
+                end = std::chrono::steady_clock::now();
+                preproc_time = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
+
+                for (uint32_t i = 0; i < norm_results.size(); i++) {
+                    if(norm_results[i] != preproc_results[i]) {
+                        cout << "Distances from CCH query and distance-preprocessed CCH query do not match. Distance from normal query: "
+                                            + std::to_string(norm_results[i]) + ", distance from distance-preprocessed query: "
+                                            + std::to_string(preproc_results[i]) + " for query from "
+                                            + std::to_string(s_vector[i]) + " to " + std::to_string(t_vector[i]) + ". This was query number: " + std::to_string(i) << endl;
+                    }
+                }
+
+                cout << "time in microseconds (normal query): " << norm_time << " average per query: " << norm_time / num_queries << endl;
+                cout << "Query init time in microseconds (avg): " << cch->getInitTimeNormalEngine() / num_queries << endl;
+                cout << "time in microseconds (distance-preprocessed query): " << preproc_time << " average per query: " << preproc_time / num_queries << endl;
+                cout << "Query init time in microseconds (avg): " << cch->getInitTimePreprocessedEngine() / num_queries << endl;
+                cout << "Initialized fields (avg): " << cch->getInitializedFields() / num_queries << endl;
+
+                normal_query_times[r] = norm_time / num_queries;
+                preproc_query_times[r] = preproc_time / num_queries;
+                initialized_fields[r] = cch->getInitializedFields() / num_queries;
+                num_deleted_edges[r] = cch->getNumDeletedEdges();
+                distance_preprocessing_times[r] = cch->getDistancePreprocessingTime();
+                graph_creation_times[r] = cch->getGraphCreationTime();
+                relaxedEdgesNormal[r] = cch->getRelaxedEdgesNormalEngine() / num_queries;
+                relaxedEdgesPreprocessed[r] = cch->getRelaxedEdgesPreprocessedEngine() / num_queries;
+            }
+
+            // compute averages over repetitions
+            preprocessing_distances.push_back(param);
+            avg_normal_query_times.push_back(std::reduce(normal_query_times.begin(), normal_query_times.end()) / num_repetitions);
+            avg_preproc_query_times.push_back(std::reduce(preproc_query_times.begin(), preproc_query_times.end()) / num_repetitions);
+            avg_initialized_fields.push_back(std::reduce(initialized_fields.begin(), initialized_fields.end()) / num_repetitions);
+            avg_num_deleted_edges.push_back(std::reduce(num_deleted_edges.begin(), num_deleted_edges.end()) / num_repetitions);
+            avg_distance_preprocessing_times.push_back(std::reduce(distance_preprocessing_times.begin(), distance_preprocessing_times.end()) / num_repetitions);
+            avg_graph_creation_times.push_back(std::reduce(graph_creation_times.begin(), graph_creation_times.end()) / num_repetitions);
+            avg_relaxedEdgesNormal.push_back(std::reduce(relaxedEdgesNormal.begin(), relaxedEdgesNormal.end()) / num_repetitions);
+            avg_relaxedEdgesPreprocessed.push_back(std::reduce(relaxedEdgesPreprocessed.begin(), relaxedEdgesPreprocessed.end()) / num_repetitions);
+            size_of_precomputed_data.push_back(cch->getSizeOfPrecomputedData());
+        }
+
+        // write summary to file
+        ofstream summary_file_2("weighted_in_degree_results.txt");
+        summary_file_2 << "param=[";
+        for (auto val : preprocessing_distances) summary_file_2 << val << ", ";
+        summary_file_2 << "]" << endl;
+        summary_file_2 << "normalQueryTimes=[";
+        for (auto val : avg_normal_query_times) summary_file_2 << val << ", ";
+        summary_file_2 << "]" << endl;
+        summary_file_2 << "preprocQueryTimes=[";
+        for (auto val : avg_preproc_query_times) summary_file_2 << val << ", ";
+        summary_file_2 << "]" << endl;
+        summary_file_2 << "initializedFields=[";
+        for (auto val : avg_initialized_fields) summary_file_2 << val << ", ";
+        summary_file_2 << "]" << endl;
+        summary_file_2 << "numDeletedEdges=[";
+        for (auto val : avg_num_deleted_edges) summary_file_2 << val << ", ";
+        summary_file_2 << "]" << endl;
+        summary_file_2 << "distancePreprocessingTimes=[";
+        for (auto val : avg_distance_preprocessing_times) summary_file_2 << val << ", ";
+        summary_file_2 << "]" << endl;
+        summary_file_2 << "graphCreationTimes=[";
+        for (auto val : avg_graph_creation_times) summary_file_2 << val << ", ";
+        summary_file_2 << "]" << endl;
+        summary_file_2 << "relaxedEdgesNormalEngine=[";
+        for (auto val : avg_relaxedEdgesNormal) summary_file_2 << val << ", ";
+        summary_file_2 << "]" << endl;
+        summary_file_2 << "relaxedEdgesPreprocessedEngine=[";
+        for (auto val : avg_relaxedEdgesPreprocessed) summary_file_2 << val << ", ";
+        summary_file_2 << "]" << endl;
+        summary_file_2 << "sizeOfPrecomputedDataByte=[";
+        for (auto val : size_of_precomputed_data) summary_file_2 << val * 4 << ", ";
+        summary_file_2 << "]" << endl;
+        summary_file_2.close();
 
     }catch(exception&err){
         cerr << "Stopped on exception : " << err.what() << endl;
