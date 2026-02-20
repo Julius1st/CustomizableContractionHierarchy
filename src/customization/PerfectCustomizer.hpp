@@ -11,8 +11,18 @@ public:
 
     void run();
 
+    Graph* getGperfectUp() const { return GperfectUp; }
+    Graph* getGperfectDown() const { return GperfectDown; }
+
 private:
+    void customize();
+    void generateGup();
+    void generateGdown();
+
     Graph* G;
+    Graph* GperfectUp;
+    Graph* GperfectDown;
+
     std::vector<bool> deleteUp;
     std::vector<bool> deleteDown;
 };

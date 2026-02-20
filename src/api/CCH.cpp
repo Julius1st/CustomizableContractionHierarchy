@@ -12,16 +12,23 @@ void CCH::preprocess() {
     basicCustomizer = std::make_unique<BasicCustomizer>(Gplus.get());
 }
 
-void CCH::customize() {
+void CCH::customizeBasic() {
     basicCustomizer->run();
-    queryEngine = std::make_unique<EliminationTreeQuery>(Gplus.get());
+    queryEngine = std::make_unique<EliminationTreeQuery>(Gplus.get(), Gplus.get());
+}
+
+void CCH::customizePerfect() {
+    basicCustomizer->run();
+    perfectCustomizer = std::make_unique<PerfectCustomizer>(Gplus.get());
+    perfectCustomizer->run();
+    queryEngine = std::make_unique<EliminationTreeQuery>(perfectCustomizer->getGperfectUp(), perfectCustomizer->getGperfectDown());
 }
 
 void CCH::preprocessDistances(uint32_t preprocessingParameter, uint32_t choiceScheme) {
     GwithPrecomputedDistances.reset();
     distancePreprocessing = std::make_unique<DistancePreprocessing>(Gplus.get());
     GwithPrecomputedDistances = distancePreprocessing->run(preprocessingParameter, choiceScheme);
-    distancePreprocessedQueryEngine = std::make_unique<EliminationTreeQuery>(GwithPrecomputedDistances.get());
+    distancePreprocessedQueryEngine = std::make_unique<EliminationTreeQuery>(GwithPrecomputedDistances.get(), GwithPrecomputedDistances.get());
 }
 
 uint32_t CCH::query(uint32_t s, uint32_t t) {

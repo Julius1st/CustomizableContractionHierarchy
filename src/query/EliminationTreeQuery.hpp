@@ -10,7 +10,7 @@
 // Elimination-tree-based query
 class EliminationTreeQuery {
 public:
-    EliminationTreeQuery(Graph* g);
+    EliminationTreeQuery(Graph* gUp, Graph* gDown);
 
     uint32_t query(uint32_t s, uint32_t t);
 
@@ -20,7 +20,8 @@ public:
     uint32_t relaxedEdges = 0;
 
 private:
-    const Graph* G;
+    const Graph* Gup;
+    const Graph* Gdown;
 
     std::vector<uint32_t> distUp;
     std::vector<uint32_t> distDown;

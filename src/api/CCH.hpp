@@ -6,6 +6,7 @@
 #include "core/Graph.hpp"
 #include "preprocessing/ContractionBuilder.hpp"
 #include "customization/BasicCustomizer.hpp"
+#include "customization/PerfectCustomizer.hpp"
 #include "query/EliminationTreeQuery.hpp"
 #include "DistancePreprocessing.hpp"
 #include <vector>
@@ -17,7 +18,8 @@ public:
     explicit CCH(Graph* baseGraph, std::vector<uint32_t>& order);
 
     void preprocess();
-    void customize();
+    void customizeBasic();
+    void customizePerfect();
     void preprocessDistances(uint32_t preprocessingParameter, uint32_t choiceScheme);
     uint32_t query(uint32_t s, uint32_t t);
     uint32_t queryWithDistancePreprocessing(uint32_t s, uint32_t t);
@@ -41,6 +43,8 @@ public:
     //For testing:
     void printEliminationTreeInformationOfGplus();
     void printEliminationTreeInformationOfNewGraph();
+    Graph* getGup() { return perfectCustomizer->getGperfectUp(); }
+    Graph* getGdown() { return perfectCustomizer->getGperfectDown(); }
     Graph* getGplus() const { return Gplus.get(); }
 
     std::unique_ptr<ContractionBuilder> builder;
@@ -53,6 +57,7 @@ private:
 
 
     std::unique_ptr<BasicCustomizer> basicCustomizer;
+    std::unique_ptr<PerfectCustomizer> perfectCustomizer;
     std::unique_ptr<EliminationTreeQuery> queryEngine;
     std::unique_ptr<EliminationTreeQuery> distancePreprocessedQueryEngine;
 

@@ -11,6 +11,12 @@ PerfectCustomizer::PerfectCustomizer(Graph* Graph) {
 }
 
 void PerfectCustomizer::run() {
+    customize();
+    generateGup();
+    generateGdown();
+}
+
+void PerfectCustomizer::customize() {
     auto headStart = G->beginNeighborhood(0);
     // reverse rank order:
     for (uint32_t u = G->numVertices(); u-- > 0;) {
@@ -26,7 +32,7 @@ void PerfectCustomizer::run() {
 
                 // (u, v, w) is an upper triangle of uv
                 if (G->getUpwardWeight(vIndex + k) + G->getDownwardWeight(uwIndex) < G->getUpwardWeight(uvIndex)) { // forward
-                    G->setUpwardWeight(uvIndex, G->getDownwardWeight(uwIndex) < G->getUpwardWeight(uvIndex));
+                    G->setUpwardWeight(uvIndex, G->getUpwardWeight(vIndex + k) + G->getDownwardWeight(uwIndex));
                     deleteUp[uvIndex] = true;
                 }
                 if (G->getDownwardWeight(vIndex + k) + G->getUpwardWeight(uwIndex) < G->getDownwardWeight(uvIndex)) { // backward
@@ -46,4 +52,64 @@ void PerfectCustomizer::run() {
             }
         }
     }
+}
+
+void PerfectCustomizer::generateGup() {
+    uint32_t numVertices = G->numVertices();
+    uint32_t numEdges = G->numEdges();
+
+    std::vector<uint32_t> newFirstOut(numVertices + 1);
+    std::vector<uint32_t> newHead(numEdges);
+    std::vector<uint32_t> newUpwardWeights(numEdges);
+    std::vector<uint32_t> newDownwardWeights(numEdges);
+
+    newFirstOut[0] = 0;
+    uint32_t overallAddedEdges = 0;
+    for (uint32_t node = 0; node < numVertices; node++) {
+        for (uint32_t edge = G->firstOut[node]; edge < G->firstOut[node+1]; edge++) {
+            if (!deleteUp[edge]) {
+                newHead[overallAddedEdges] = G->head[edge];
+                newUpwardWeights[overallAddedEdges] = G->upwardWeights[edge];
+                newDownwardWeights[overallAddedEdges] = G->downwardWeights[edge];
+                overallAddedEdges++;
+            }
+        }
+        newFirstOut[node +1] = overallAddedEdges;
+    }
+
+    newHead.resize(overallAddedEdges);
+    newUpwardWeights.resize(overallAddedEdges);
+    newDownwardWeights.resize(overallAddedEdges);
+
+    GperfectUp = new Graph(newFirstOut, newHead, newUpwardWeights, newDownwardWeights, G->eliminationTree);
+}
+
+void PerfectCustomizer::generateGdown() {
+    uint32_t numVertices = G->numVertices();
+    uint32_t numEdges = G->numEdges();
+
+    std::vector<uint32_t> newFirstOut(numVertices + 1);
+    std::vector<uint32_t> newHead(numEdges);
+    std::vector<uint32_t> newUpwardWeights(numEdges);
+    std::vector<uint32_t> newDownwardWeights(numEdges);
+
+    newFirstOut[0] = 0;
+    uint32_t overallAddedEdges = 0;
+    for (uint32_t node = 0; node < numVertices; node++) {
+        for (uint32_t edge = G->firstOut[node]; edge < G->firstOut[node+1]; edge++) {
+            if (!deleteDown[edge]) {
+                newHead[overallAddedEdges] = G->head[edge];
+                newUpwardWeights[overallAddedEdges] = G->upwardWeights[edge];
+                newDownwardWeights[overallAddedEdges] = G->downwardWeights[edge];
+                overallAddedEdges++;
+            }
+        }
+        newFirstOut[node +1] = overallAddedEdges;
+    }
+
+    newHead.resize(overallAddedEdges);
+    newUpwardWeights.resize(overallAddedEdges);
+    newDownwardWeights.resize(overallAddedEdges);
+
+    GperfectDown = new Graph(newFirstOut, newHead, newUpwardWeights, newDownwardWeights, G->eliminationTree);
 }

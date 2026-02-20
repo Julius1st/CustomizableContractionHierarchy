@@ -4,11 +4,12 @@
 
 #include "EliminationTreeQuery.hpp"
 
-EliminationTreeQuery::EliminationTreeQuery(Graph *g) : G(g){
-    distUp = std::vector<uint32_t> (G->numVertices(), Graph::INFINITY_VALUE);
-    distDown = std::vector<uint32_t> (G->numVertices(), Graph::INFINITY_VALUE);
-    predecessorUp = std::vector<uint32_t> (G->numVertices(), Graph::INFINITY_VALUE);
-    predecessorDown = std::vector<uint32_t> (G->numVertices(), Graph::INFINITY_VALUE);
+EliminationTreeQuery::EliminationTreeQuery(Graph *gUp, Graph* gDown) : Gup(gUp), Gdown(gDown) {
+    if (gUp->n != gDown->n) throw std::runtime_error("The two graphs used to initialize the query must have the same number of vertices.");
+    distUp = std::vector<uint32_t> (Gup->numVertices(), Graph::INFINITY_VALUE);
+    distDown = std::vector<uint32_t> (Gup->numVertices(), Graph::INFINITY_VALUE);
+    predecessorUp = std::vector<uint32_t> (Gup->numVertices(), Graph::INFINITY_VALUE);
+    predecessorDown = std::vector<uint32_t> (Gup->numVertices(), Graph::INFINITY_VALUE);
 }
 
 uint32_t EliminationTreeQuery::query(uint32_t s, uint32_t t) {
@@ -20,16 +21,16 @@ uint32_t EliminationTreeQuery::query(uint32_t s, uint32_t t) {
     uint32_t d = initializeDistances(s, t);
     auto end = std::chrono::steady_clock::now();
     initTime += std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
-    initializedFields += G->precomputedNodes[s].size() + G->precomputedNodes[t].size();
+    initializedFields += Gup->precomputedNodes[s].size() + Gup->precomputedNodes[t].size();
 
     // Original Algorithm
     while (s != t) {
         if (s < t) {
             ProcessVertexUp(s, d);
-            s = G->eliminationTree[s];
+            s = Gup->eliminationTree[s];
         } else {
             ProcessVertexDown(t, d);
-            t = G->eliminationTree[t];
+            t = Gdown->eliminationTree[t];
         }
     }
 
@@ -39,7 +40,7 @@ uint32_t EliminationTreeQuery::query(uint32_t s, uint32_t t) {
         d = std::min(d, distUp[u] + distDown[u]);
         ProcessVertexUp(u, d);
         ProcessVertexDown(u, d);
-        u = G->eliminationTree[u];
+        u = Gup->eliminationTree[u];
     }
 
     return d;
@@ -47,10 +48,10 @@ uint32_t EliminationTreeQuery::query(uint32_t s, uint32_t t) {
 
 void EliminationTreeQuery::ProcessVertexUp(uint32_t u, uint32_t d) {
     if (distUp[u] < d) {
-        for (uint32_t i = G->firstOut[u]; i < G->firstOut[u+1]; i++) {
-            uint32_t v = G->head[i];
-            if (distUp[u] + G->upwardWeights[i] < distUp[v]) {
-                distUp[v] = distUp[u] + G->upwardWeights[i];
+        for (uint32_t i = Gup->firstOut[u]; i < Gup->firstOut[u+1]; i++) {
+            uint32_t v = Gup->head[i];
+            if (distUp[u] + Gup->upwardWeights[i] < distUp[v]) {
+                distUp[v] = distUp[u] + Gup->upwardWeights[i];
                 predecessorUp[v] = u;
             }
             relaxedEdges++;
@@ -61,10 +62,10 @@ void EliminationTreeQuery::ProcessVertexUp(uint32_t u, uint32_t d) {
 
 void EliminationTreeQuery::ProcessVertexDown(uint32_t u, uint32_t d) {
     if (distDown[u] < d) {
-        for (uint32_t i = G->firstOut[u]; i < G->firstOut[u+1]; i++) {
-            uint32_t v = G->head[i];
-            if (distDown[u] + G->downwardWeights[i] < distDown[v]) {
-                distDown[v] = distDown[u] + G->downwardWeights[i];
+        for (uint32_t i = Gdown->firstOut[u]; i < Gdown->firstOut[u+1]; i++) {
+            uint32_t v = Gdown->head[i];
+            if (distDown[u] + Gdown->downwardWeights[i] < distDown[v]) {
+                distDown[v] = distDown[u] + Gdown->downwardWeights[i];
                 predecessorDown[v] = u;
             }
             relaxedEdges++;
@@ -76,29 +77,29 @@ void EliminationTreeQuery::ProcessVertexDown(uint32_t u, uint32_t d) {
 uint32_t EliminationTreeQuery::initializeDistances(uint32_t s, uint32_t t) {
     uint32_t d = Graph::INFINITY_VALUE;
 
-    for (uint32_t sIndex = 0; sIndex < G->precomputedNodes[s].size(); sIndex++) {
-        if (G->precomputedDistancesUp[s][sIndex] >= Graph::INFINITY_VALUE) continue;
-        distUp[G->precomputedNodes[s][sIndex]] = G->precomputedDistancesUp[s][sIndex];
+    for (uint32_t sIndex = 0; sIndex < Gup->precomputedNodes[s].size(); sIndex++) {
+        if (Gup->precomputedDistancesUp[s][sIndex] >= Graph::INFINITY_VALUE) continue;
+        distUp[Gup->precomputedNodes[s][sIndex]] = Gup->precomputedDistancesUp[s][sIndex];
         uint32_t currentVertex = s;
 
         // The prerequisite for this to work is, that in every precomputedNodes[x][sIndex] the same sIndex corresponds to the same node in the elimination tree. (For this sub tree)
-        while (currentVertex != G->precomputedNodes[s][sIndex]) {
-            predecessorUp[G->successorUp[currentVertex][sIndex]] = currentVertex;
-            currentVertex = G->successorUp[currentVertex][sIndex];
+        while (currentVertex != Gup->precomputedNodes[s][sIndex]) {
+            predecessorUp[Gup->successorUp[currentVertex][sIndex]] = currentVertex;
+            currentVertex = Gup->successorUp[currentVertex][sIndex];
         }
     }
 
-    for (uint32_t tIndex = 0; tIndex < G->precomputedNodes[t].size(); tIndex++) {
-        if (G->precomputedDistancesDown[t][tIndex] >= Graph::INFINITY_VALUE) continue;
-        distDown[G->precomputedNodes[t][tIndex]] = G->precomputedDistancesDown[t][tIndex];
+    for (uint32_t tIndex = 0; tIndex < Gdown->precomputedNodes[t].size(); tIndex++) {
+        if (Gdown->precomputedDistancesDown[t][tIndex] >= Graph::INFINITY_VALUE) continue;
+        distDown[Gdown->precomputedNodes[t][tIndex]] = Gdown->precomputedDistancesDown[t][tIndex];
 
         uint32_t currentVertex = t;
-        while (currentVertex != G->precomputedNodes[t][tIndex]) {
-            predecessorDown[G->successorDown[currentVertex][tIndex]] = currentVertex;
-            currentVertex = G->successorDown[currentVertex][tIndex];
+        while (currentVertex != Gdown->precomputedNodes[t][tIndex]) {
+            predecessorDown[Gdown->successorDown[currentVertex][tIndex]] = currentVertex;
+            currentVertex = Gdown->successorDown[currentVertex][tIndex];
         }
 
-        d = std::min(d, distUp[G->precomputedNodes[t][tIndex]] + distDown[G->precomputedNodes[t][tIndex]]);
+        d = std::min(d, distUp[Gup->precomputedNodes[t][tIndex]] + distDown[Gdown->precomputedNodes[t][tIndex]]);
     }
 
     return d;
