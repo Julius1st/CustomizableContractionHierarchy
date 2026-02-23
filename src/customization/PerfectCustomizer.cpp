@@ -20,34 +20,47 @@ void PerfectCustomizer::customize() {
     auto headStart = G->beginNeighborhood(0);
     // reverse rank order:
     for (uint32_t u = G->numVertices(); u-- > 0;) {
-        for (auto itv = G->beginNeighborhood(u); itv != G->endNeighborhood(u); itv++) {
-            uint32_t v = *itv;
-            uint32_t vIndex = std::distance(headStart, G->beginNeighborhood(v));
-            uint32_t uvIndex = std::distance(headStart, itv);
+        for (uint32_t uv = G->firstOut[u]; uv < G->firstOut[u+1]; uv++) {
+            uint32_t v = G->head[uv];
+            uint32_t vStart = G->firstOut[v];
             uint32_t k = 0;
-            for (auto itw = itv+1; itw != G->endNeighborhood(u); itw++) {
-                uint32_t w = *itw;
-                uint32_t uwIndex = std::distance(headStart, itw);
-                while (G->getHead(vIndex + k) != w) k++;
+            for (auto uw = uv+1; uw < G->firstOut[u+1]; uw++) {
+                uint32_t w = G->head[uw];
+                while (G->head[vStart + k] != w) k++;
 
                 // (u, v, w) is an upper triangle of uv
-                if (G->getUpwardWeight(vIndex + k) + G->getDownwardWeight(uwIndex) < G->getUpwardWeight(uvIndex)) { // forward
-                    G->setUpwardWeight(uvIndex, G->getUpwardWeight(vIndex + k) + G->getDownwardWeight(uwIndex));
-                    deleteUp[uvIndex] = true;
+                if (G->downwardWeights[vStart + k] + G->upwardWeights[uw] < G->upwardWeights[uv]) { // forward
+                    G->upwardWeights[uv] = G->downwardWeights[vStart + k] + G->upwardWeights[uw];
+                    deleteUp[uv] = true;
                 }
-                if (G->getDownwardWeight(vIndex + k) + G->getUpwardWeight(uwIndex) < G->getDownwardWeight(uvIndex)) { // backward
-                    G->setDownwardWeight(uvIndex, G->getDownwardWeight(vIndex + k) + G->getUpwardWeight(uwIndex));
-                    deleteDown[uvIndex] = true;
+                if (G->upwardWeights[vStart + k] + G->downwardWeights[uw] < G->downwardWeights[uv]) { // backward
+                    G->downwardWeights[uv] = G->upwardWeights[vStart + k] + G->downwardWeights[uw];
+                    deleteDown[uv] = true;
                 }
 
-                // (u, v, w) is an intermediate triangle of uw
-                if (G->getUpwardWeight(uvIndex) + G->getUpwardWeight(vIndex + k) < G->getUpwardWeight(uwIndex)) { // forward
-                    G->setUpwardWeight(uwIndex, G->getUpwardWeight(uvIndex) + G->getUpwardWeight(vIndex + k));
-                    deleteUp[uwIndex] = true;
+                /*
+                // (u, v, w) is an upper triangle of uv
+                if (G->upwardWeights[vStart + k] + G->downwardWeights[uw] < G->upwardWeights[uv]) { // forward
+                    G->upwardWeights[uv] = G->upwardWeights[vStart + k] + G->downwardWeights[uw];
+                    deleteUp[uv] = true;
                 }
-                if (G->getDownwardWeight(uvIndex) + G->getDownwardWeight(vIndex + k) < G->getDownwardWeight(uwIndex)) { // backward
-                    G->setDownwardWeight(uwIndex, G->getDownwardWeight(uvIndex) + G->getDownwardWeight(vIndex + k));
-                    deleteDown[uwIndex] = true;
+                if (G->downwardWeights[vStart + k] + G->upwardWeights[uw] < G->downwardWeights[uv]) { // backward
+                    G->downwardWeights[uv] = G->downwardWeights[vStart + k] + G->upwardWeights[uw];
+                    deleteDown[uv] = true;
+                    if (G->downwardWeights[uv] == 35) {
+                        std::cout << "Edge (" << u << ", " << v << ") has new downward weight 35" << std::endl;
+                    }
+                }
+                 */
+
+                // (u, v, w) is an intermediate triangle of uw
+                if (G->upwardWeights[uv] + G->upwardWeights[vStart + k] < G->upwardWeights[uw]) { // forward
+                    G->upwardWeights[uw] = G->upwardWeights[uv] + G->upwardWeights[vStart + k];
+                    deleteUp[uw] = true;
+                }
+                if (G->downwardWeights[uv] + G->downwardWeights[vStart + k] < G->downwardWeights[uw]) { // backward
+                    G->downwardWeights[uw] = G->downwardWeights[uv] + G->downwardWeights[vStart + k];
+                    deleteDown[uw] = true;
                 }
             }
         }
