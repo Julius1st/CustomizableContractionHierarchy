@@ -165,7 +165,7 @@ auto buildTestGraph() {
     vector<uint32_t> first_out = {0, 2, 3, 4, 5, 7, 8, 8, 8};
     vector<uint32_t> head = {2, 3, 3, 4, 4, 5, 6, 7};
     vector<uint32_t> upward_weight = {2, 3, 13, 24, 34, 45, 46, 57};
-    vector<uint32_t> downward_weight = {20, 30, 31, 42, 43, 54, 64, 75};
+    vector<uint32_t> downward_weight = {200, 30, 31, 42, 43, 54, 64, 75};
 
     return make_unique<Graph>(first_out, head, upward_weight, downward_weight);
 }
@@ -289,11 +289,28 @@ int main(int argc, char *argv[]) {
         cch->preprocess();
         cout << "done" << endl;
 
+        std::chrono::steady_clock::time_point begin;
+        std::chrono::steady_clock::time_point end;
+
         cout << "Customizing Graph ... " << flush;
-        cch->customize();
+        //cch->customizeBasic();
+        begin = std::chrono::steady_clock::now();
+        cch->customizePerfect();
+        end = std::chrono::steady_clock::now();
+        long perfect_cust_time = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
         cout << "done" << endl;
 
-        int num_repetitions = 10; // number of repetitions for each preprocessing parameter to get a more stable average query time
+        auto cchBasic = make_unique<CCH>(G.get(), order);
+        cchBasic->preprocess();
+        begin = std::chrono::steady_clock::now();
+        cchBasic->customizeBasic();
+        end = std::chrono::steady_clock::now();
+        long basic_cust_time = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
+
+        cout << "Basic Customization time in microseconds: " << basic_cust_time << endl;
+        cout << "Perfect Customization time in microseconds: " << perfect_cust_time << endl;
+
+        int num_repetitions = 3; // number of repetitions for each preprocessing parameter to get a more stable average query time
 
         // some random queries from which the average query runtime is computed
         int num_queries = 10000;
@@ -320,6 +337,53 @@ int main(int argc, char *argv[]) {
         vector<uint64_t> avg_relaxedEdgesPreprocessed;
         vector<uint64_t> size_of_precomputed_data; // in number of uint32 fields
 
+        /*
+        vector<uint32_t> test(num_queries);
+        long test_time;
+        begin = std::chrono::steady_clock::now();
+        for (uint32_t i = 0; i < s_vector.size(); i++) {
+            uint32_t s = s_vector[i];
+            uint32_t t = t_vector[i];
+            test[i] = cchBasic->query(s, t);
+        }
+        end = std::chrono::steady_clock::now();
+        test_time = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
+
+        vector<uint32_t> norm_results(num_queries);
+        vector<long> normal_query_times(num_repetitions);
+        for (int r = 0; r < num_repetitions; r++) {
+            long norm_time;
+            begin = std::chrono::steady_clock::now();
+            for (uint32_t i = 0; i < s_vector.size(); i++) {
+                uint32_t s = s_vector[i];
+                uint32_t t = t_vector[i];
+                norm_results[i] = cch->query(s, t);
+            }
+            end = std::chrono::steady_clock::now();
+            norm_time = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
+            normal_query_times[r] = norm_time / num_queries;
+        }
+       long avg_norm_time = 0;
+        for (int r = 0; r < num_repetitions; r++) {
+            avg_norm_time += normal_query_times[r];
+        }
+        avg_norm_time /= num_repetitions;
+
+
+        for (uint32_t i = 0; i < norm_results.size(); i++) {
+            if(norm_results[i] != test[i]) {
+                cout << "Distances from CCH query and distance-preprocessed CCH query do not match. Distance from basic query: "
+                                    + std::to_string(test[i]) + ", distance from perfect query: "
+                                    + std::to_string(norm_results[i]) + " for query from "
+                                    + std::to_string(s_vector[i]) + " to " + std::to_string(t_vector[i]) + ". This was query number: " + std::to_string(i) << endl;
+            }
+        }
+
+        cout << "time in microseconds (test query) average per query: " << test_time / num_queries << endl;
+        cout << "time in microseconds (perfect query) average per query: " << avg_norm_time << endl;
+        return 0;
+        */
+
         // For choice scheme max distance to root (number 0)
         for (int param = 0; param <= maxPreprocessingParameter_0; param+=preprocessingStepSize_0) {
 
@@ -336,7 +400,8 @@ int main(int argc, char *argv[]) {
 
                 cout << "----------------------------------------" << endl;
                 cout << "Preprocessing Distances with parameter " << param << " ... " << std::endl << flush;
-                cch->preprocessDistances(param, 0);
+                //cch->preprocessDistances(param, 0);
+                cch->perfectBasedPreprocessing(param, 0);
                 cout << "Querying distances ... " << endl << flush;
 
                 cch->resetRelaxedEdgesCounters();
@@ -438,7 +503,7 @@ int main(int argc, char *argv[]) {
         summary_file << "]" << endl;
         summary_file.close();
 
-
+        return 0;
 
         preprocessing_distances.clear();
         avg_normal_query_times.clear();
@@ -467,7 +532,8 @@ int main(int argc, char *argv[]) {
 
                 cout << "----------------------------------------" << endl;
                 cout << "Preprocessing Distances with parameter " << param << " ... " << std::endl << flush;
-                cch->preprocessDistances(param, 1);
+                //cch->preprocessDistances(param, 1);
+                cch->perfectBasedPreprocessing(param, 1);
                 cout << "Querying distances ... " << endl << flush;
 
                 cch->resetRelaxedEdgesCounters();
@@ -573,5 +639,3 @@ int main(int argc, char *argv[]) {
         cerr << "Stopped on exception : " << err.what() << endl;
     }
 }
-
-

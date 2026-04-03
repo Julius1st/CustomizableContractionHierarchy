@@ -21,6 +21,7 @@ public:
     void customizeBasic();
     void customizePerfect();
     void preprocessDistances(uint32_t preprocessingParameter, uint32_t choiceScheme);
+    void perfectBasedPreprocessing(uint32_t preprocessingParameter, uint32_t choiceScheme);
     uint32_t query(uint32_t s, uint32_t t);
     uint32_t queryWithDistancePreprocessing(uint32_t s, uint32_t t);
 
@@ -63,5 +64,7 @@ private:
 
     // For query speed-up:
     std::unique_ptr<DistancePreprocessing> distancePreprocessing;
+    std::unique_ptr<DistancePreprocessing> distancePreprocessing2;
     std::unique_ptr<Graph> GwithPrecomputedDistances;
+    std::unique_ptr<Graph> GwithPrecomputedDistances2;
 };

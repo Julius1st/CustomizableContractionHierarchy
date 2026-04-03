@@ -24,6 +24,16 @@ void CCH::customizePerfect() {
     queryEngine = std::make_unique<EliminationTreeQuery>(perfectCustomizer->getGperfectUp(), perfectCustomizer->getGperfectDown());
 }
 
+void CCH::perfectBasedPreprocessing(uint32_t preprocessingParameter, uint32_t choiceScheme) {
+    GwithPrecomputedDistances.reset();
+    GwithPrecomputedDistances2.reset();
+    distancePreprocessing = std::make_unique<DistancePreprocessing>(perfectCustomizer->getGperfectUp());
+    distancePreprocessing2 = std::make_unique<DistancePreprocessing>(perfectCustomizer->getGperfectDown());
+    GwithPrecomputedDistances = distancePreprocessing->run(preprocessingParameter, choiceScheme);
+    GwithPrecomputedDistances2 = distancePreprocessing2->run(preprocessingParameter, choiceScheme);
+    distancePreprocessedQueryEngine = std::make_unique<EliminationTreeQuery>(GwithPrecomputedDistances.get(), GwithPrecomputedDistances2.get());
+}
+
 void CCH::preprocessDistances(uint32_t preprocessingParameter, uint32_t choiceScheme) {
     GwithPrecomputedDistances.reset();
     distancePreprocessing = std::make_unique<DistancePreprocessing>(Gplus.get());
